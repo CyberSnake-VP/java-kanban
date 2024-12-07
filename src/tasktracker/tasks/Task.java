@@ -1,4 +1,4 @@
-package tasktracker.task;
+package tasktracker.tasks;
 
 import tasktracker.status.Status;
 import java.util.Objects;

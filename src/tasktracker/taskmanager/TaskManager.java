@@ -1,9 +1,7 @@
 package tasktracker.taskmanager;
-import tasktracker.status.Status;
-import tasktracker.subtask.Subtask;
-import tasktracker.task.Task;
-import tasktracker.epic.Epic;
 
+import tasktracker.status.Status;
+import tasktracker.tasks.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,7 +10,8 @@ public class TaskManager {
     private  final HashMap <Integer, Epic> epics = new HashMap<>();  // Эпиков
     private  final HashMap <Integer, Subtask> subtasks = new HashMap<>(); // Подзадач для эпиков
 
-    IdIterator iteratorId = new IdIterator(); // Подключаем генератор id
+    private final IdIterator iteratorId = new IdIterator(); // Подключаем генератор id
+    private final EpicStatusDetector epicStatusDetector = new EpicStatusDetector(); // Подключаем определитель статус эпика
 
     // Методы для Task
     public Task createTask(Task task) {          // Создание задачи
@@ -86,32 +85,8 @@ public class TaskManager {
             Epic epicCopy = new Epic(epic.getName(), epic.getDescription());
             epicCopy.setId(epic.getId());
             epicCopy.setSubtaskIdList(epic.getSubtaskIdList());       // Копируем список id подклассов(subtasks)
-
-            // Для изменения статус у Эпика, проверим статус на правильность, по его подзадачам.
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epicCopy); // Получаем подзадачи эпика
-            if(epicSubtasksList.isEmpty()){
-                epics.put(epicCopy.getId(), epicCopy); // Если его список подзадач пуст, тогда при создании объекта Копии
-                return true;                           // эпика, по-умолчанию статус эпика будет NEW
-            }
-            boolean isInProgress = false;              // Если у эпика есть подзадачи, проверяем статус подзадач
-            boolean isNew = false;
-            for (Subtask subtask : epicSubtasksList) {
-                switch (subtask.getStatus()) {
-                    case IN_PROGRESS:                 // Есть ли в Эпике подзадачи со статусом IN_PROGRESS
-                        isInProgress = true;
-                        break;
-                    case NEW:
-                        isNew = true;                 // Есть ли в Эпике подзадачи со статусом NEW
-                        break;
-                }
-            }
-            if(isInProgress) {
-                epicCopy.setStatus(Status.IN_PROGRESS);   // Есть подзадачи IN_PROGRESS значит эпик должен быть IN_PROGRESS
-            }else if(isNew) {
-                epicCopy.setStatus(Status.NEW);           // Если нет подзадач со статусом IN_PROGRESS, но есть со статусом NEW
-            }else {
-                epicCopy.setStatus(Status.DONE);          // В эпике нет подзадач IN_PROGRESS и NEW, ставим статус DONE
-            }
+            epicStatusDetector.setEpicStatus(epicCopy, epicSubtasksList);
             epics.put(epicCopy.getId(), epicCopy);        // Записываем копию эпика в таблицу с эпиками
             return true;                                  // Обновление успешно
         }
@@ -171,31 +146,13 @@ public class TaskManager {
         int id = iteratorId.generateId();            // Генерация ID
         subtask.setId(id);                           // Запись в поле id подзадачи(subtask)
         Epic epic = epics.get(subtask.getEpicId());  // Получение Эпика, из таблицы, к которому привяжем подзадачу.
+        epic.setSubtaskIdList(subtask.getId());
         Subtask subtaskCopy = new Subtask(subtask.getName(), subtask.getDescription(),subtask.getStatus(),epic);
         subtaskCopy.setId(id);                        // Создаем копию подзадачи с генерированным id
-        epic.setSubtaskIdList(subtaskCopy.getId());
-        subtasks.put(subtaskCopy.getId(), subtaskCopy); // Записываем копию подзадачи в список подзадач
 
-        ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic);  // Обновляем статус у Эпика
-        boolean isInProgress = false;
-        boolean isNew = false;
-        for (Subtask sub : epicSubtasksList) {
-            switch (sub.getStatus()) {
-                case IN_PROGRESS:
-                    isInProgress = true;
-                    break;
-                case NEW:
-                    isNew = true;
-                    break;
-            }
-        }
-        if(isInProgress){
-            epic.setStatus(Status.IN_PROGRESS);          // Если есть подзадача с IN_PROGRESS делаем статус эпика таким же
-        }else if(isNew) {
-            epic.setStatus(Status.NEW);                  // Если нет подзадач с IN_PROGRESS, но есть с NEW статус эпика будет NEW
-        }else {
-            epic.setStatus(Status.DONE);                 // Тогда в эпике задачи со статусом DONE, делаем статус эпика DONE
-        }
+        subtasks.put(subtaskCopy.getId(), subtaskCopy); // Записываем копию подзадачи в список подзадач
+        ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic);  // Получаем список подзадач у Эпика
+        epicStatusDetector.setEpicStatus(epic, epicSubtasksList); // РЕФАКТОРИНГ, метод setEpicStatus устанавливает статус эпика
         return subtask;   // Возвращаем объект подзадачи.
     }
 
@@ -206,26 +163,8 @@ public class TaskManager {
             subtaskCopy.setId(subtask.getId());
             subtasks.put(subtaskCopy.getId(), subtaskCopy);   // Аналогично с добавлением новой подзадачи, кладем копию подзадачи
 
-            ArrayList<Subtask> epicSubtask = getSubtaskListInEpic(epic);    // Меняем статус эпика
-            boolean isInProgress = false;
-            boolean isNew = false;
-            for (Subtask sub : epicSubtask) {
-                switch (sub.getStatus()) {
-                    case IN_PROGRESS:
-                        isInProgress = true;
-                        break;
-                    case NEW:
-                        isNew = true;
-                        break;
-                }
-            }
-            if(isInProgress){
-                epic.setStatus(Status.IN_PROGRESS);
-            }else if(isNew) {
-                epic.setStatus(Status.NEW);
-            }else {
-                epic.setStatus(Status.DONE);
-            }
+            ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
+            epicStatusDetector.setEpicStatus(epic, epicSubtaskList);  // Обновляем статус эпика
             return true;
         }
         return false;
@@ -275,30 +214,8 @@ public class TaskManager {
             Epic epic = epics.get(subtask.getEpicId());                  // Получаем эпик этой подзадачи
             ArrayList<Integer> subtaskListId = epic.getSubtaskIdList();  // Получаем список id подзадач у эпика
             subtaskListId.remove((Integer) subtask.getId());             // Удаляем подзадачу по id из списка подзадач у эпика
-            ArrayList<Subtask> subtasksList= getSubtaskListInEpic(epic); // Получаем список объектов подзадач у эпика
-            if(subtasksList.isEmpty()){                                  // Обновляем статус у эпика по оставшимся подзадачам
-                epic.setStatus(Status.NEW);
-                return subtasks.remove(subtask.getId());                 // Если подзадач больше нет, то статус NEW
-            }
-            boolean isInProgress = false;                                // Обновляем статус эпика
-            boolean isNew = false;
-            for (Subtask sub: subtasksList) {
-                switch (sub.getStatus()) {
-                    case IN_PROGRESS:
-                        isInProgress = true;
-                        break;
-                    case NEW:
-                        isNew = true;
-                        break;
-                }
-            }
-            if(isInProgress) {
-                epic.setStatus(Status.IN_PROGRESS);
-            } else if (isNew) {
-                epic.setStatus(Status.NEW);
-            } else {
-                epic.setStatus(Status.DONE);
-            }
+            ArrayList<Subtask> epicSubtasksList= getSubtaskListInEpic(epic); // Получаем список объектов подзадач у эпика
+            epicStatusDetector.setEpicStatus(epic, epicSubtasksList);    // Обновляем статус у эпика
             return subtasks.remove(subtask.getId());   // Удаляем задачу из таблицы и возвращаем объект удаленной задачи
         }
 

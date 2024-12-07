@@ -1,7 +1,6 @@
-package tasktracker.epic;
+package tasktracker.tasks;
 
 import tasktracker.status.Status;
-import tasktracker.task.Task;
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -19,7 +18,7 @@ public class Epic extends Task {
                     "name='" + getName() + '\'' +
                     ", description='" + getDescription() + '\'' +
                     ", id=" + getId() +
-                    ", status=" + getStatus() + '\'' +
+                    ", status=" + getStatus() +
                     ", subtaskIdList=" + subtaskIdList +
                 '}';
 

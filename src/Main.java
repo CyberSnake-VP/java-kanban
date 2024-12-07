@@ -1,7 +1,5 @@
-import tasktracker.epic.Epic;
+import tasktracker.tasks.*;
 import tasktracker.status.Status;
-import tasktracker.subtask.Subtask;
-import tasktracker.task.Task;
 import tasktracker.taskmanager.TaskManager;
 
 public class Main {
@@ -40,14 +38,14 @@ public class Main {
         taskManager.updateTask(task1);
         taskManager.updateTask(task2);
 
-        epic1.setStatus(Status.DONE);
         epic1.setStatus(Status.IN_PROGRESS);
+        epic2.setStatus(Status.IN_PROGRESS);
         taskManager.updateEpic(epic1);
         taskManager.updateEpic(epic2);
 
-        subtask1.setStatus(Status.IN_PROGRESS);
+        subtask1.setStatus(Status.IN_PROGRESS );
         subtask2.setStatus(Status.DONE);
-        subtask3.setStatus(Status.NEW);
+        subtask3.setStatus(Status.IN_PROGRESS);
         taskManager.updateSubtask(subtask1);
         taskManager.updateSubtask(subtask2);
         taskManager.updateSubtask(subtask3);
