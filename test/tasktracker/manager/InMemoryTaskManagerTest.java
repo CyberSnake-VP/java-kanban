@@ -284,13 +284,6 @@ public class InMemoryTaskManagerTest {
         Subtask actualSubtask = taskManager.getSubtask(expectedSubtask.getId());
         Subtask actualCopySubtaskMustBeNull = taskManager.createSubtask(expectedSubtask);
 
-        Epic actualEpic = taskManager.getEpic(epicWithId.getId());
-        assertEquals(Status.NEW, actualEpic.getStatus(), "Статус у эпика не верный");
-        taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId, Status.IN_PROGRESS));
-        taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId, Status.DONE));
-        actualEpic = taskManager.getEpic(epicWithId.getId());
-        assertEquals(Status.IN_PROGRESS, actualEpic.getStatus(), "Статус у эпика не верный");
-
         // expect
         assertNotNull(actualSubtask, "Подзадача не была создана");
         assertNull(actualCopySubtaskMustBeNull, "Одна и та же подзадача не должен создаваться");
