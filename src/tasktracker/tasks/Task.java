@@ -14,6 +14,17 @@ public class Task {
         this.description = description;
         this.status = status;
     }
+    public Task(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+    }
+    public Task(Task task) {
+        this.name = task.getName();
+        this.description = task.getDescription();
+        this.status = task.getStatus();
+        this.id = task.getId();
+    }
 
     public void setName(String name) {
         this.name = name;
@@ -58,6 +69,7 @@ public class Task {
         Task task = (Task) o;
         return id == task.id;
     }
+
     // Перезаписываем hashCode через поле id
     @Override
     public int hashCode() {

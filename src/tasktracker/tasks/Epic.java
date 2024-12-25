@@ -10,6 +10,11 @@ public class Epic extends Task {
     public Epic(String name, String description) {
         super(name, description, Status.NEW);                             // Статус эпика по-умолчанию NEW
     }
+    public Epic(Epic epic) {
+        super(epic.getName(), epic.getDescription(), epic.getStatus());
+        this.setId(epic.getId());
+        this.setSubtaskIdList(epic.getSubtaskIdList());
+    }
 
 
     @Override
@@ -33,7 +38,7 @@ public class Epic extends Task {
     }
 
     public void setSubtaskIdList(ArrayList<Integer> subtaskIdList) {     // OVERLOAD метод для копирования epica в другой объект
-        this.subtaskIdList.addAll(subtaskIdList);                        // Через getSubtaskIdlist() получим список
+        this.subtaskIdList.addAll(subtaskIdList);                        // Через getSubtaskIdlist() получим список Id
     }                                                                    // Закинем этот список через этот метод, для копирования.
 
 }

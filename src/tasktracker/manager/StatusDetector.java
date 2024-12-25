@@ -1,15 +1,20 @@
-package tasktracker.taskmanager;
+package tasktracker.manager;
 
 import tasktracker.status.Status;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import java.util.ArrayList;
 
-class EpicStatusDetector {
-    // Метод для обновления статуса у эпика
-    public void setEpicStatus(Epic epic, ArrayList<Subtask> epicSubtasksList) {
+class StatusDetector {
+
+    // Утилитарный класс, устанавливает статус объекту эпик, сделал метод статическим, потому-что результат работы метода
+    // никак не может повлиять на работу класса TaskManager из вне.
+    // Служебный метод, меняет статус только лишь тому объекту, которого принимает.
+
+    static void setEpicStatus(Epic epic, ArrayList<Subtask> epicSubtasksList) {
         if(epicSubtasksList.isEmpty()){
             epic.setStatus(Status.NEW);
+            return;
         }
         boolean isNew = false;
         for (Subtask sub : epicSubtasksList) {
