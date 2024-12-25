@@ -2,7 +2,6 @@ package tasktracker.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasktracker.status.Status;
 import tasktracker.tasks.Task;
 
 import java.util.List;
