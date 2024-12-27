@@ -35,6 +35,16 @@ class InMemoryHistoryManagerTest {
     }
 
     @Test
+    void addNull() {
+        Task taskNull = null;
+
+        historyManager.add(taskNull);
+        final List<Task> history = historyManager.getHistory();
+
+        assertEquals(0, history.size(), "Размер списка неверный");
+    }
+
+    @Test
     void getHistory() {
         historyManager.add(task);
 

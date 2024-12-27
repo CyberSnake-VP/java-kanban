@@ -44,6 +44,10 @@ public class Main {
 
         printAllTasks(taskManager);
 
+        taskManager.createTask(null);
+        taskManager.createSubtask(null);
+        taskManager.createEpic(null);
+
     }
 
     private static void printAllTasks(TaskManager manager) {
