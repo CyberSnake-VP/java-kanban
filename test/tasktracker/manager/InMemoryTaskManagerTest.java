@@ -434,5 +434,33 @@ public class InMemoryTaskManagerTest {
 
     }
 
+    @Test
+    void shouldBeSaveActualVersionTaskWithoutChanceChangeWithUseSet() {
+        // given
+        String expectedName = "name";
+        String expectedDescription = "description";
+        Status expectedStatus = Status.NEW;
+        Task expectedTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus));
+
+        // do
+        expectedTask.setName("otherName");
+        expectedTask.setDescription("otherDescription");
+        expectedTask.setStatus(Status.DONE);
+        Task actualTask = taskManager.getTask(expectedTask.getId());
+        taskManager.updateTask(actualTask);
+        actualTask.setName("otherName");
+        actualTask.setDescription("otherDescription");
+        actualTask.setStatus(Status.DONE);
+        actualTask = taskManager.getTask(expectedTask.getId());
+
+
+        // expect
+        assertEquals(expectedName, actualTask.getName(), "Имена не совпадают");
+        assertEquals(expectedDescription, actualTask.getDescription(), "Описание не совпадает");
+        assertEquals(expectedStatus, actualTask.getStatus(), "Статусы не совпадают");
+
+    }
+
+
 }
 
