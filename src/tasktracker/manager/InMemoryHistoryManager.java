@@ -10,6 +10,21 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     private final List<Task> history = new ArrayList<>();
 
+    // Создаем внутренний класс Node для создания линк-узла задачи
+    private Node head;
+    private Node tail;
+
+    private static class Node {
+        private Node prev;
+        private Task task;
+        private Node next;
+
+        public Node(Node prev, Task task, Node next) {
+            this.prev = prev;
+            this.task = task;
+            this.next = next;
+        }
+    }
 
     @Override
     public void add(Task task) {
