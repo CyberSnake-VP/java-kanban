@@ -63,6 +63,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Task> deleteTaskList() {                        // Удаление списка всех задач
         ArrayList<Task> taskList = new ArrayList<>(tasks.values());
+        for (Integer id : tasks.keySet()) {
+            historyManager.remove(id);                               // Получаем id задачи из таблицы и удаляем задачу из истории
+        }
         tasks.clear();                                               // Удаляем список задач. Возвращаем список удаленных задач
         return taskList;
     }
@@ -131,6 +134,14 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Epic> deleteEpicList() {                             // Удаляем список всех эпиков
         ArrayList<Epic> epicList = new ArrayList<>(epics.values());
+
+        for(Epic epic : epics.values()) {                                 // Пробегаемся по эпиками, получаем список их подзадач
+             for(Integer idSub : epic.getSubtaskIdList()){
+                 historyManager.remove(idSub);                            // Удаляем все подзадачи из истории
+             }
+             historyManager.remove(epic.getId());                         // Удаляем все эпики из истории
+        }
+
         epics.clear();                                                    // Очищаем список эпиков
         subtasks.clear();                                                 // Очищаем список подзадач
         return epicList;                                                  // Возвращаем список удаленных
@@ -141,9 +152,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(id)) {
             final Epic epic = epics.get(id);
             for (Integer subId : epic.getSubtaskIdList()) {               // Получаем список id его подзадач
+                historyManager.remove(subId);                             // Удаляем подзадачу из истории
                 subtasks.remove(subId);                                   // Удаляем его подзадачи из таблицы подзадач
             }
-
+            historyManager.remove(id);                                    // Удаляем эпик из истории
             return epics.remove(id);                                      // Удаляем эпик из таблицы и возвращаем удаленный эпик
         }
         return null;
@@ -202,6 +214,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Subtask> deleteSubtaskList() {                    // Удалить список всех подзадач
         ArrayList<Subtask> subtaskList = new ArrayList<>(subtasks.values());
+        for(Integer idSub : subtasks.keySet()) {
+            historyManager.remove(idSub);                             // Удаляем все подзадачи из истории
+        }
         subtasks.clear();                                             // Очищаем таблицу подзадач
         for (Epic epic : epics.values()) {                            // Пробегаемся по всем эпикам из таблицы
             epic.getSubtaskIdList().clear();                          // Очищаем списки id подзадач у эпиков
@@ -215,6 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsValue(epic)) {
             ArrayList<Subtask> subtask = getSubtaskListInEpic(epic);     // Получаем список подзадач у эпика
             for (Integer id : epic.getSubtaskIdList()) {
+                historyManager.remove(id);                               // Удаляем подзадачи из истории
                 subtasks.remove(id);                                     // Удаляем подзадачи у эпика из таблицы подзадач
             }
             epic.setStatus(Status.NEW);                                  // Обновляем статус по умолчанию NEW
@@ -236,7 +252,7 @@ public class InMemoryTaskManager implements TaskManager {
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список объектов подзадач у эпика
 
             StatusDetector.setEpicStatus(epic, epicSubtasksList);    // Обновляем статус у эпика
-
+            historyManager.remove(id);                               // Удаляем подзадачу из истории
             return subtasks.remove(subtask.getId());   // Удаляем задачу из таблицы и возвращаем объект удаленной задачи
         }
 

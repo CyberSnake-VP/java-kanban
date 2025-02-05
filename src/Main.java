@@ -42,7 +42,6 @@ public class Main {
         taskManager.getTask(task1.getId());
 
 
-
         printAllTasks(taskManager);
 
         taskManager.createTask(null);
