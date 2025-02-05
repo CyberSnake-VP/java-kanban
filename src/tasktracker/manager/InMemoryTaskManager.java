@@ -69,6 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task deleteTask(int id) {
+        historyManager.remove(id);                                  // Удаляем задачу из истории
         return tasks.remove(id);                                    // Удаляем задачу по id из таблицы
     }
 

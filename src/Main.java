@@ -24,7 +24,7 @@ public class Main {
 
         Subtask subtask1 = new Subtask("Купить билеты", "Выбрать авиакомпанию, подобрать даты...", epic1, Status.IN_PROGRESS);
         Subtask subtask2 = new Subtask("Cобрать багаж", "Найти чемодан, сложить вещи...", epic1);
-        Subtask subtask3 = new Subtask("Построить ракету", "Создание ракеты с максимальной полезной нагрузкой...", epic2);
+        Subtask subtask3 = new Subtask("Построить ракету", "Создание ракеты с максимальной полезной нагрузкой...", epic1);
         taskManager.createSubtask(subtask1);
         taskManager.createSubtask(subtask2);
         taskManager.createSubtask(subtask3);
@@ -40,6 +40,7 @@ public class Main {
         taskManager.getEpic(epic1.getId());
         taskManager.getEpic(epic2.getId());
         taskManager.getTask(task1.getId());
+
 
 
         printAllTasks(taskManager);

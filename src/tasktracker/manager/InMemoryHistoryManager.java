@@ -78,9 +78,12 @@ public class InMemoryHistoryManager implements HistoryManager {
         nextNode.prev = prevNode;
     }
 
+    // Удаляем историю из таблицы Map
     @Override
     public void remove(int id) {
-
+        Node nodeForRemove = history.get(id);       // Получаем ноду из таблицы
+        removeNode(nodeForRemove);                  // Удаляем ноду из связного списка(линксписка)
+        history.remove(id);                         // Удаляем задачу из самой таблицы
     }
 
     @Override
@@ -98,7 +101,6 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public List<Task> getHistory() {
         return getTask();       // Возвращаем список истории
-
     }
 
 }
