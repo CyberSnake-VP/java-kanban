@@ -28,7 +28,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = iteratorId.generateId();           // Генерируем уникальный id
         task.setId(id);                             // Запись id в поле задачи.
-        tasks.put(task.getId(), task);
+        tasks.put(task.getId(), new Task(task));    // Кладем в таблицу копию задачи
 
         return task;                                //Вернем пользователю задачу с заполненным полем id
     }
@@ -36,7 +36,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public boolean updateTask(Task task) {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
         if (tasks.containsValue(task)) {
-            tasks.put(task.getId(), task);          // Записываем задачу в таблицу, возвращаем true;
+            tasks.put(task.getId(), new Task(task)); // Записываем копию задачи в таблицу, возвращаем true;
             return true;
         }
         return false;
@@ -51,11 +51,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(int id) {                // Получение задачи по id
         if (tasks.containsKey(id)) {
-            final Task task = tasks.get(id);
+            Task task = tasks.get(id);
             //Я думал, что запись копии задачи в историю просмотров необходима, чтобы при изменении задачи, методом updateTask
             //не менялась версия задачи в списке истории, тем самым достигаем сохранения предыдущей версии задачи в истории по ТЗ
             historyManager.add(new Task(task));
-            return task;                         // Возвращаем задачу
+            return new Task(task);                         // Возвращаем копию задачи
         }
         return null;
     }
@@ -88,7 +88,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = iteratorId.generateId();                          // Генерируем id из записываем id в поле эпика
         epic.setId(id);
-        epics.put(epic.getId(), epic);                             // Записываем эпик в таблицу, возвращаем эпик с id
+        epics.put(epic.getId(), new Epic(epic));                   // Записываем копию эпика в таблицу, возвращаем эпик с id
         return epic;
     }
 
@@ -98,7 +98,7 @@ public class InMemoryTaskManager implements TaskManager {
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем подзадачи эпика
             StatusDetector.setEpicStatus(epic, epicSubtasksList);             // Обновляем статус эпика по его подзадачам
 
-            epics.put(epic.getId(), epic);                                    // Записываем эпик в таблицу с эпиками
+            epics.put(epic.getId(), new Epic(epic));                          // Записываем копию в таблицу с эпиками
             return true;                                                      // Обновление успешно
         }
         return false;
@@ -126,7 +126,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(id)) {
             final Epic epic = epics.get(id);                             // Получаем эпик из таблицы, создаем его копию
             historyManager.add(new Epic(epic));                          // Запись копии эпика в историю просмотров
-            return epic;                                                 // Возвращаем эпик
+            return new Epic(epic);                                       // Возвращаем копию эпика
         }
         return null;
     }
@@ -175,21 +175,21 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setId(id);                                // Запись в поле id подзадачи(subtask)
         Epic epic = epics.get(subtask.getEpicId());       // Получение Эпика, из таблицы, к которому привяжем подзадачу.
         epic.setSubtaskIdList(subtask.getId());
-        subtasks.put(subtask.getId(), subtask);           // Записываем подзадачу в список подзадач
-        ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic);  // Получаем список подзадач у Эпика
-        StatusDetector.setEpicStatus(epic, epicSubtasksList); // метод setEpicStatus устанавливает статус эпика
+        subtasks.put(subtask.getId(), new Subtask(subtask, epic));        // Записываем копию в список подзадач
+        ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список подзадач у Эпика
+        StatusDetector.setEpicStatus(epic, epicSubtasksList);             // метод setEpicStatus устанавливает статус эпика
 
-        return subtask;   // Возвращаем объект подзадачи.
+        return subtask;     // Возвращаем объект подзадачи.
     }
 
     @Override
-    public boolean updateSubtask(Subtask subtask) {      // Обновление подзадачи
+    public boolean updateSubtask(Subtask subtask) {                          // Обновление подзадачи
         if (subtasks.containsValue(subtask)) {
-            subtasks.put(subtask.getId(), subtask);   // Кладем копию подзадачи
-
             Epic epic = epics.get(subtask.getEpicId());
+            subtasks.put(subtask.getId(), new Subtask(subtask, epic));       // Кладем копию подзадачи
+
             ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
-            StatusDetector.setEpicStatus(epic, epicSubtaskList);  // Обновляем статус эпика
+            StatusDetector.setEpicStatus(epic, epicSubtaskList);             // Обновляем статус эпика
             return true;
         }
         return false;
@@ -201,12 +201,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask getSubtask(int id) {         // Получение подзадачи по id
+    public Subtask getSubtask(int id) {                             // Получение подзадачи по id
         if (subtasks.containsKey(id)) {
-            final Subtask subtask = subtasks.get(id);
+            Subtask subtask = subtasks.get(id);
             Epic epic = epics.get(subtask.getEpicId());
-            historyManager.add(new Subtask(subtask, epic)); // Запись копии подзадачи в историю просмотров
-            return subtask;                                 // Возврат подзадачи
+            historyManager.add(new Subtask(subtask, epic));         // Запись копии подзадачи в историю просмотров
+            return new Subtask(subtask, epic);                      // Возврат копии подзадачи
         }
         return null;
     }
@@ -252,6 +252,7 @@ public class InMemoryTaskManager implements TaskManager {
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список объектов подзадач у эпика
 
             StatusDetector.setEpicStatus(epic, epicSubtasksList);    // Обновляем статус у эпика
+
             historyManager.remove(id);                               // Удаляем подзадачу из истории
             return subtasks.remove(subtask.getId());   // Удаляем задачу из таблицы и возвращаем объект удаленной задачи
         }
