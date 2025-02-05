@@ -1,7 +1,5 @@
 package tasktracker.manager;
 
-import tasktracker.tasks.Epic;
-import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
 
 import java.util.ArrayList;
@@ -38,6 +36,25 @@ public class InMemoryHistoryManager implements HistoryManager {
             oldTail.next = newTail;
         }
         return newTail;
+    }
+
+    // Метод собирающий задачи в список ArrayList
+    public List<Task> getTask() {
+        List<Task> tasks = new ArrayList<>();
+        if(head == null) {
+            return tasks;             // Проверяем существуют ли ноды?
+        }
+        else if(head == tail) {
+            tasks.add(head.task);
+            return tasks;             // Если всего одна нода, то просто воз-ем задачу этой ноды
+        }
+        Node curNode = head;
+        while (curNode != tail ) {    // Насчет
+            tasks.add(curNode.task);
+            curNode = curNode.next;
+        }
+        tasks.add(tail.task);
+        return tasks;
     }
 
     @Override
