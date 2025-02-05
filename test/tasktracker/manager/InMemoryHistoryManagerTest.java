@@ -2,6 +2,8 @@ package tasktracker.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tasktracker.tasks.Epic;
+import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
 
 import java.util.List;
@@ -15,23 +17,54 @@ class InMemoryHistoryManagerTest {
 
     @BeforeEach
     void init() {
-        task = new Task("name", "description");
+        task = new Task("", "");
         historyManager = Managers.getDefaultHistory();
 
     }
 
     @Test
     void add() {
-        final int limitHistory = 10;
+        // given
+        Task expectedTask = new Task(task);
+        Epic expectedEpic = new Epic("","");
+        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        expectedTask.setId(1);
+        expectedEpic.setId(2);
+        expectedSubtask.setId(3);
 
-        for (int i = 0; i < 15; i++) {
-            historyManager.add(task);
-        }
-        final List<Task> history = historyManager.getHistory();
+        // do
+        historyManager.add(expectedTask);
+        historyManager.add(expectedEpic);
+        historyManager.add(expectedSubtask);
+        historyManager.add(expectedTask);
 
-        assertNotNull(history, "История не создана.");
-        assertEquals(limitHistory, history.size(), "Размер списка не должен превышать 10");
+        // expect
+        assertEquals(3, historyManager.getHistory().size(), "Неверная длина списка");
+    }
 
+
+    @Test
+    void remove() {
+        // given
+        Task expectedTask = new Task(task);
+        Epic expectedEpic = new Epic("","");
+        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        expectedTask.setId(1);
+        expectedEpic.setId(2);
+        expectedSubtask.setId(3);
+
+        // do
+        historyManager.add(expectedTask);
+        historyManager.add(expectedEpic);
+        historyManager.add(expectedSubtask);
+        historyManager.remove(expectedTask.getId());
+        historyManager.remove(expectedEpic.getId());
+        historyManager.remove(expectedSubtask.getId());
+        historyManager.remove(10);
+
+
+        // expect
+        assertEquals(0, historyManager.getHistory().size(), "Неверная длина списка");;
     }
 
     @Test
@@ -46,13 +79,21 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void getHistory() {
-        historyManager.add(task);
+        Task expectedTask = new Task(task);
+        Epic expectedEpic = new Epic("","");
+        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        expectedTask.setId(1);
+        expectedEpic.setId(2);
+        expectedSubtask.setId(3);
 
+        historyManager.add(expectedTask);
+        historyManager.add(expectedEpic);
+        historyManager.add(expectedSubtask);
+        historyManager.add(expectedTask);
         List<Task> history = historyManager.getHistory();
 
-        assertEquals(1, history.size(), "Неверный размер списка");
-        assertEquals(task, history.getFirst(), "Разные задачи");
-
+        assertEquals(3, history.size(), "Неверный размер списка");
+        assertEquals(expectedEpic, historyManager.getHistory().getFirst(), "Неверная последовательность задач");
     }
 
 }
