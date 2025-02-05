@@ -61,7 +61,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     // Метод для удаления ноды из линксписка
     public void removeNode(Node node) {
-        if(head == tail){            // Если нода голова и хвост, т.е. одна
+        if (head == tail) {            // Если нода голова и хвост, т.е. одна
             head = null;
             tail = null;
             return;
@@ -86,7 +86,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     // Удаляем историю из таблицы Map
     @Override
     public void remove(int id) {
-        if(history.containsKey(id)) {
+        if (history.containsKey(id)) {
             Node nodeForRemove = history.get(id);       // Получаем ноду из таблицы
             removeNode(nodeForRemove);                  // Удаляем ноду из связного списка(линксписка)
             history.remove(id);                         // Удаляем задачу из самой таблицы

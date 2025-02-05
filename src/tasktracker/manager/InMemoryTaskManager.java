@@ -23,7 +23,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (tasks.containsValue(task)) {            // Проверяем на наличие задачи в списке задач,
             return null;                            // Если задача уже существует, не создаем ее. Вернем null
         }
-        if(task == null) {                          // Проверяем существует ли задача.
+        if (task == null) {                          // Проверяем существует ли задача.
             return null;
         }
         int id = iteratorId.generateId();           // Генерируем уникальный id
@@ -83,7 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsValue(epic)) {
             return null;
         }
-        if(epic == null) {                                         // Проверяем существует ли эпик.
+        if (epic == null) {                                         // Проверяем существует ли эпик.
             return null;
         }
         int id = iteratorId.generateId();                          // Генерируем id из записываем id в поле эпика
@@ -135,11 +135,11 @@ public class InMemoryTaskManager implements TaskManager {
     public ArrayList<Epic> deleteEpicList() {                             // Удаляем список всех эпиков
         ArrayList<Epic> epicList = new ArrayList<>(epics.values());
 
-        for(Epic epic : epics.values()) {                                 // Пробегаемся по эпиками, получаем список их подзадач
-             for(Integer idSub : epic.getSubtaskIdList()){
-                 historyManager.remove(idSub);                            // Удаляем все подзадачи из истории
-             }
-             historyManager.remove(epic.getId());                         // Удаляем все эпики из истории
+        for (Epic epic : epics.values()) {                                 // Пробегаемся по эпиками, получаем список их подзадач
+            for (Integer idSub : epic.getSubtaskIdList()) {
+                historyManager.remove(idSub);                            // Удаляем все подзадачи из истории
+            }
+            historyManager.remove(epic.getId());                         // Удаляем все эпики из истории
         }
 
         epics.clear();                                                    // Очищаем список эпиков
@@ -168,7 +168,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (subtasks.containsValue(subtask)) {            // Проверка, есть ли уже такая подзадача.
             return null;
         }
-        if(subtask == null) {                             // Проверяем существует ли подзадача.
+        if (subtask == null) {                             // Проверяем существует ли подзадача.
             return null;
         }
         int id = iteratorId.generateId();                 // Генерация ID
@@ -214,7 +214,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public ArrayList<Subtask> deleteSubtaskList() {                    // Удалить список всех подзадач
         ArrayList<Subtask> subtaskList = new ArrayList<>(subtasks.values());
-        for(Integer idSub : subtasks.keySet()) {
+        for (Integer idSub : subtasks.keySet()) {
             historyManager.remove(idSub);                             // Удаляем все подзадачи из истории
         }
         subtasks.clear();                                             // Очищаем таблицу подзадач

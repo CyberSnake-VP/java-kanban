@@ -1,6 +1,7 @@
 package tasktracker.tasks;
 
 import tasktracker.status.Status;
+
 import java.util.ArrayList;
 
 public class Epic extends Task {
@@ -10,6 +11,7 @@ public class Epic extends Task {
     public Epic(String name, String description) {
         super(name, description, Status.NEW);                             // Статус эпика по-умолчанию NEW
     }
+
     public Epic(Epic epic) {
         super(epic.getName(), epic.getDescription(), epic.getStatus());
         this.setId(epic.getId());
@@ -19,12 +21,12 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return   "Epic{" +
-                    "name='" + getName() + '\'' +
-                    ", description='" + getDescription() + '\'' +
-                    ", id=" + getId() +
-                    ", status=" + getStatus() +
-                    ", subtaskIdList=" + subtaskIdList +
+        return "Epic{" +
+                "name='" + getName() + '\'' +
+                ", description='" + getDescription() + '\'' +
+                ", id=" + getId() +
+                ", status=" + getStatus() +
+                ", subtaskIdList=" + subtaskIdList +
                 '}';
 
     }
