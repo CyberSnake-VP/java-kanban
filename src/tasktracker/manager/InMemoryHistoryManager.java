@@ -56,6 +56,25 @@ public class InMemoryHistoryManager implements HistoryManager {
         tasks.add(tail.task);
         return tasks;
     }
+    
+    // Метод для удаления ноды из линксписка
+    public void removeNode(Node node) {
+        if(node == head) {
+            head = head.next;         // Если нода - голова
+            head.prev = null;
+            return;
+        }
+        else if(node == tail) {
+            tail = tail.prev;         // Если нода - хвост
+            tail.next = null;
+            return;
+        }
+                                      // Перезаписываем ссылки prev и next ноды, чтобы ссылались друг на друга
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
+        prevNode.next = nextNode;
+        nextNode.prev = prevNode;
+    }
 
     @Override
     public void remove(int id) {
