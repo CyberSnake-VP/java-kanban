@@ -3,6 +3,7 @@ package tasktracker.manager;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +27,22 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
     }
 
+    // Метод для добавления задачи в конец списка
+    public Node linkLast(Task task) {
+        Node oldTail = tail;
+        Node newTail = new Node(tail, task, null);
+        tail = newTail;
+        if (oldTail == null) {
+            head = newTail;
+        } else {
+            oldTail.next = newTail;
+        }
+        return newTail;
+    }
+
     @Override
     public void add(Task task) {
-        if(task == null) {
+        if (task == null) {
             return;
         }
         history.add(task);                     // Добавляем задачу в историю
@@ -43,4 +57,5 @@ public class InMemoryHistoryManager implements HistoryManager {
         return new ArrayList<>(history);       // Возвращаем копию списка истории
 
     }
+
 }
