@@ -28,73 +28,70 @@ public class Main {
         taskManager.createSubtask(subtask3);
 
         taskManager.getTask(task1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getTask(task2.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getSubtask(subtask1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getSubtask(subtask2.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getSubtask(subtask3.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getSubtask(subtask1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getSubtask(subtask2.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getTask(task1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getEpic(epic1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getEpic(epic2.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.getTask(task1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.deleteTask(task1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
         taskManager.deleteEpic(epic1.getId());
-        for(Task tasks : taskManager.getHistory()) {
+        for (Task tasks : taskManager.getHistory()) {
             System.out.print(tasks.getName() + " | ");
         }
         System.out.println();
-
-
-
 
     }
 }

@@ -3,6 +3,7 @@ package tasktracker.manager;
 import tasktracker.status.Status;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
+
 import java.util.ArrayList;
 
 class StatusDetector {
@@ -12,7 +13,7 @@ class StatusDetector {
     // Служебный метод, меняет статус только лишь тому объекту, которого принимает.
 
     static void setEpicStatus(Epic epic, ArrayList<Subtask> epicSubtasksList) {
-        if(epicSubtasksList.isEmpty()){
+        if (epicSubtasksList.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
@@ -27,9 +28,9 @@ class StatusDetector {
                     break;
             }
         }
-        if(isNew) {
+        if (isNew) {
             epic.setStatus(Status.NEW);        // Если нет подзадач с IN_PROGRESS, но есть с NEW статус эпика будет NEW
-        }else {
+        } else {
             epic.setStatus(Status.DONE);       // Тогда в эпике задачи со статусом DONE, делаем статус эпика DONE
         }
     }

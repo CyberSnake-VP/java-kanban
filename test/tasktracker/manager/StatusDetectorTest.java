@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StatusDetectorTest {
 
-   private TaskManager taskManager;
-   private Epic epic;
+    private TaskManager taskManager;
+    private Epic epic;
 
     @BeforeEach
     void initManagerAndEpic() {

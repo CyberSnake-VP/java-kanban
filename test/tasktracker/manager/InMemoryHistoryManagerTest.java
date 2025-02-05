@@ -26,8 +26,8 @@ class InMemoryHistoryManagerTest {
     void add() {
         // given
         Task expectedTask = new Task(task);
-        Epic expectedEpic = new Epic("","");
-        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        Epic expectedEpic = new Epic("", "");
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -47,8 +47,8 @@ class InMemoryHistoryManagerTest {
     void remove() {
         // given
         Task expectedTask = new Task(task);
-        Epic expectedEpic = new Epic("","");
-        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        Epic expectedEpic = new Epic("", "");
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -64,7 +64,8 @@ class InMemoryHistoryManagerTest {
 
 
         // expect
-        assertEquals(0, historyManager.getHistory().size(), "Неверная длина списка");;
+        assertEquals(0, historyManager.getHistory().size(), "Неверная длина списка");
+        ;
     }
 
     @Test
@@ -80,8 +81,8 @@ class InMemoryHistoryManagerTest {
     @Test
     void getHistory() {
         Task expectedTask = new Task(task);
-        Epic expectedEpic = new Epic("","");
-        Subtask expectedSubtask = new Subtask("","", new Epic("",""));
+        Epic expectedEpic = new Epic("", "");
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);

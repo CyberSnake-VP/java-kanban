@@ -117,7 +117,7 @@ public class InMemoryTaskManagerTest {
     @Test
     void deleteTaskList() {
         // given
-       final int extendedTaskListSize = 0;
+        final int extendedTaskListSize = 0;
 
         // do
         taskManager.createTask(task);
@@ -185,10 +185,10 @@ public class InMemoryTaskManagerTest {
         Epic actualEpicUpdate = taskManager.getEpic(createdEpic.getId());
 
         // expect
-        assertNotNull(createdEpic,"Эпик не был обновлен");
-        assertEquals(expectedName, actualEpicUpdate.getName(),"поле name не совпадает");
-        assertEquals(expectedDescription, actualEpicUpdate.getDescription(),"поле description не совпадает");
-        assertEquals(expectedStatus, actualEpicUpdate.getStatus(),"Статус не должен быть изменен самостоятельно");
+        assertNotNull(createdEpic, "Эпик не был обновлен");
+        assertEquals(expectedName, actualEpicUpdate.getName(), "поле name не совпадает");
+        assertEquals(expectedDescription, actualEpicUpdate.getDescription(), "поле description не совпадает");
+        assertEquals(expectedStatus, actualEpicUpdate.getStatus(), "Статус не должен быть изменен самостоятельно");
 
     }
 
@@ -222,7 +222,7 @@ public class InMemoryTaskManagerTest {
 
         // expect
         assertNotNull(actualSubtaskList, "Список подзадач не создан");
-        assertEquals(expectedSubtaskList.size(),actualSubtaskList.size(), "Размеры списков подзадач не совпадают");
+        assertEquals(expectedSubtaskList.size(), actualSubtaskList.size(), "Размеры списков подзадач не совпадают");
         assertEquals(expectedSubtaskList.getFirst(), actualSubtaskList.getFirst(), "Подзадачи отличаются");
 
     }
@@ -237,14 +237,14 @@ public class InMemoryTaskManagerTest {
 
         // expect
         assertNotNull(actualEpic, "Эпик не был создан");
-        assertEquals(expectedEpic, actualEpic,"Эпики разные");
+        assertEquals(expectedEpic, actualEpic, "Эпики разные");
 
     }
 
     @Test
     void deleteEpicList() {
         // given
-       final int expectedEpicListSize = 0;
+        final int expectedEpicListSize = 0;
 
         // do
         taskManager.createEpic(epic);
@@ -312,7 +312,7 @@ public class InMemoryTaskManagerTest {
 
 
         // expect
-        assertNotNull(actualSubtaskAfterUpdate,"Подзадача не обновлена");
+        assertNotNull(actualSubtaskAfterUpdate, "Подзадача не обновлена");
         assertEquals(expectedName, actualSubtaskAfterUpdate.getName(), "Поле name не совпадает");
         assertEquals(expectedDescription, actualSubtaskAfterUpdate.getDescription(), "Поле description не совпадает");
         assertEquals(Status.IN_PROGRESS, actualSubtaskAfterUpdate.getStatus(), "Поле статус не совпадает");
@@ -332,7 +332,7 @@ public class InMemoryTaskManagerTest {
 
         // expect
         assertNotNull(actualSubtaskList, "Список не создан");
-        assertEquals(expectedSubtasksList.size(),actualSubtaskList.size(), "Длина списков подзадач не совпадает");
+        assertEquals(expectedSubtasksList.size(), actualSubtaskList.size(), "Длина списков подзадач не совпадает");
         assertEquals(expectedSubtasksList.getFirst(), actualSubtaskList.getFirst(), "Подзадачи не равны");
 
     }
