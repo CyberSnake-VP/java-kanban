@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    Map<Integer, Node> history = new HashMap<>();
+    private Map<Integer, Node> history = new HashMap<>();
 
     // Создаем внутренний класс Node для создания линк-узла задачи
     private Node head;
@@ -38,25 +38,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             oldTail.next = newTail;
         }
         return newTail;
-    }
-
-    // Метод собирающий задачи в список ArrayList
-    public List<Task> getTask() {
-        List<Task> tasks = new ArrayList<>();
-        if (head == null) {
-            return tasks;             // Проверяем существуют ли ноды?
-        }
-        if (head == tail) {
-            tasks.add(head.task);
-            return tasks;             // Если всего одна нода, то просто воз-ем задачу этой ноды
-        }
-        Node curNode = head;
-        while (curNode != tail) {     // Начиная с головы двигаемся до хвоста
-            tasks.add(curNode.task);  // Добавляем задачу в список
-            curNode = curNode.next;   // Переключаемся на следующую ноду
-        }
-        tasks.add(tail.task);         // Добавляем в список задачу хвоста
-        return tasks;
     }
 
     // Метод для удаления ноды из линксписка
@@ -107,7 +88,14 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public List<Task> getHistory() {
-        return getTask();       // Возвращаем список истории
+        List<Task> tasks = new ArrayList<>();
+
+        Node node = head;
+        while (node != null) {
+            tasks.add(node.task);
+            node = node.next;
+        }
+        return tasks;       // Возвращаем список истории
     }
 
 }
