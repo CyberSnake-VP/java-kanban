@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ManagersTest {
 
 
-
     @Test
     void getDefault() {
         TaskManager taskManager = Managers.getDefault();
@@ -19,6 +18,6 @@ class ManagersTest {
     void getDefaultHistory() {
         HistoryManager historyManager = Managers.getDefaultHistory();
 
-        assertNotNull(historyManager,"Менеджер истории не создается");
+        assertNotNull(historyManager, "Менеджер истории не создается");
     }
 }

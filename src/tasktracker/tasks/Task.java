@@ -1,6 +1,7 @@
 package tasktracker.tasks;
 
 import tasktracker.status.Status;
+
 import java.util.Objects;
 
 public class Task {
@@ -14,11 +15,13 @@ public class Task {
         this.description = description;
         this.status = status;
     }
+
     public Task(String name, String description) {
         this.name = name;
         this.description = description;
         this.status = Status.NEW;
     }
+
     public Task(Task task) {
         this.name = task.getName();
         this.description = task.getDescription();
@@ -29,12 +32,15 @@ public class Task {
     public void setName(String name) {
         this.name = name;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
+
     public void setStatus(Status status) {
         this.status = status;
     }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -42,12 +48,15 @@ public class Task {
     public int getId() {
         return id;
     }
+
     public String getName() {
         return name;
     }
-    public String getDescription(){
+
+    public String getDescription() {
         return description;
     }
+
     public Status getStatus() {
         return status;
     }
@@ -55,10 +64,10 @@ public class Task {
     @Override
     public String toString() {
         return "Task{" +
-                    "name='" + name + '\'' +
-                    ", description='" + description + '\'' +
-                    ", id=" + id +
-                    ", status=" + status +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", id=" + id +
+                ", status=" + status +
                 '}';
     }
 
