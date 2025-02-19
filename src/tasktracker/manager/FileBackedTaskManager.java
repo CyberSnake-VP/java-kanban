@@ -1,12 +1,10 @@
 package tasktracker.manager;
 
+import tasktracker.exceptions.ManagerSaveException;
 import tasktracker.status.Status;
 import tasktracker.tasks.*;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -18,12 +16,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public void save() {
-
         String taskForWrite = getStringTasks();
-        try(Writer fw = new FileWriter(data)) {
+        try (Writer fw = new FileWriter(data)) {
             fw.write(taskForWrite);
-        }catch (IOException e) {
-            System.out.println("Что-то не так");
+        } catch (FileNotFoundException e) {
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка записи в файл.");
         }
 
     }
@@ -71,6 +70,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         super.createTask(task);
         save();
         return task;
+    }
+
+    @Override
+    public Epic createEpic(Epic epic) {
+        super.createEpic(epic);
+        save();
+        return epic;
+    }
+
+    @Override
+    public Subtask createSubtask(Subtask subtask) {
+        super.createSubtask(subtask);
+        save();
+        return subtask;
     }
 
 }

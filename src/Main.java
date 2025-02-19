@@ -34,6 +34,12 @@ public class Main {
 
         fm.createTask(task1);
         fm.createTask(task2);
+        fm.createEpic(epic1);
+        fm.createEpic(epic2);
+        fm.createSubtask(subtask1);
+        fm.createSubtask(subtask2);
+        fm.createSubtask(subtask3);
+
 
 
 
