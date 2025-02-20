@@ -1,4 +1,4 @@
-package tasktracker.manager;
+package tasktracker.enumeration;
 
 public enum TypeTasks {
     TASK,

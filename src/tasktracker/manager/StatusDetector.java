@@ -1,6 +1,6 @@
 package tasktracker.manager;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 

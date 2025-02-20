@@ -1,6 +1,6 @@
 package tasktracker.manager;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
 import tasktracker.tasks.*;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Epic> epics = new HashMap<>();                // Эпиков
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();          // Подзадач для эпиков
 
-    private final IdIterator iteratorId = new IdIterator();                      // Подключаем генератор id
+    protected final IdIterator iteratorId = new IdIterator();                      // Подключаем генератор id
     private final HistoryManager historyManager = Managers.getDefaultHistory();  // Подключаем HistoryManager
 
 

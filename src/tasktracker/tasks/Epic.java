@@ -1,6 +1,6 @@
 package tasktracker.tasks;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
 
 import java.util.ArrayList;
 

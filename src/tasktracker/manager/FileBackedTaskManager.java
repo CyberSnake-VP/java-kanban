@@ -1,8 +1,9 @@
 package tasktracker.manager;
 
+import tasktracker.enumeration.TypeTasks;
 import tasktracker.exceptions.ManagerBackupException;
 import tasktracker.exceptions.ManagerSaveException;
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
 import tasktracker.tasks.*;
 
 import java.io.IOException;
@@ -118,16 +119,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     public static FileBackedTaskManager loadFromFile(File file) {
         try {
+            int countId = 0;
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
-            List<String> list = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            List<String> listTask = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
 
-            for (String s : list) {
+            for (String s : listTask) {
                 if(!Character.isDigit(s.charAt(0))) {
                     continue;
                 }
                 Task task = fileBackedTaskManager.fromString(s);
                 fileBackedTaskManager.putTaskInMaps(task);
+
+                if(countId < task.getId()) {
+                    countId = task.getId();
+                }
             }
+            fileBackedTaskManager.iteratorId.counterID = countId + 1;
             return fileBackedTaskManager;
 
         } catch (IOException e) {

@@ -1,6 +1,6 @@
 package tasktracker.tasks;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
 
 public class Subtask extends Task {
     private final int epicId;  // id конкретного эпика, для связывания этой подзадачи с объектом эпик, в рамках которой она создается
