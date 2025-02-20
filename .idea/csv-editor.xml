@@ -10,7 +10,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/src/data.csv">
+        <entry key="/src/tasktracker/files/data.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
