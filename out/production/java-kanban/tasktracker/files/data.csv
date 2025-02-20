@@ -1,8 +1,11 @@
 id,type,name,status,description,epic
 1,TASK,Задача1,NEW,Действие,
 2,TASK,Задача2,IN_PROGRESS,Действие,
+8,TASK,Задача3,NEW,Действие,
 3,EPIC,Эпик1,IN_PROGRESS,Действие,
 4,EPIC,Эпик2,NEW,Действие,
+9,EPIC,Эпик3,NEW,Действие,
 5,SUBTASK,Подзадача1,IN_PROGRESS,Эпик1,3
 6,SUBTASK,Подзадача2,NEW,Эпик1,3
 7,SUBTASK,Подзадача3,NEW,Эпик2,4
+10,SUBTASK,Подзадача4,NEW,Эпик2,4

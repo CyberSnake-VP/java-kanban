@@ -19,10 +19,14 @@ import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-    private File data;
+    private final File data;
 
     public FileBackedTaskManager(File file) {
         this.data = file;
+    }
+
+    public File getData() {
+        return data;
     }
 
     public void save() {
@@ -84,7 +88,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Status status = Status.valueOf(splitStr[3]);
         String description = splitStr[4];
         int epicId = 0;
-        if(splitStr.length > 5){
+        if (splitStr.length > 5) {
             epicId = Integer.parseInt(splitStr[5]);
         }
         switch (type) {
@@ -108,13 +112,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void putTaskInMaps(Task task) {
-       if(task instanceof Epic) {
-           epics.put(task.getId(), (Epic)task);
-       } else if (task instanceof Subtask) {
-           subtasks.put(task.getId(), (Subtask)task);
-       } else {
-           tasks.put(task.getId(), task);
-       }
+        if (task instanceof Epic) {
+            epics.put(task.getId(), (Epic) task);
+        } else if (task instanceof Subtask) {
+            subtasks.put(task.getId(), (Subtask) task);
+        } else {
+            tasks.put(task.getId(), task);
+        }
     }
 
     public static FileBackedTaskManager loadFromFile(File file) {
@@ -124,13 +128,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             List<String> listTask = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
 
             for (String s : listTask) {
-                if(!Character.isDigit(s.charAt(0))) {
+                if (!Character.isDigit(s.charAt(0))) {
                     continue;
                 }
                 Task task = fileBackedTaskManager.fromString(s);
                 fileBackedTaskManager.putTaskInMaps(task);
 
-                if(countId < task.getId()) {
+                if (countId < task.getId()) {
                     countId = task.getId();
                 }
             }
@@ -233,4 +237,55 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return deletedList;
     }
 
+    public static void main(String[] args) {
+        FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
+
+        Task task1 = new Task("Задача1", "Действие");
+        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS);
+        Task task3 = new Task("Задача3", "Действие");
+        fm.createTask(task1);
+        fm.createTask(task2);
+
+        Epic epic1 = new Epic("Эпик1", "Действие");
+        Epic epic2 = new Epic("Эпик2", "Действие");
+        Epic epic3 = new Epic("Эпик3", "Действие");
+        fm.createEpic(epic1);
+        fm.createEpic(epic2);
+
+        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS);
+        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1);
+        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2);
+        Subtask subtask4 = new Subtask("Подзадача4", "Эпик2", epic2);
+        fm.createSubtask(subtask1);
+        fm.createSubtask(subtask2);
+        fm.createSubtask(subtask3);
+
+        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
+        System.out.println("Загрузка из файла:");
+        printTaskTest(fmBackup);
+
+        System.out.println("Добавлены новые задачи:");
+        fmBackup.createTask(task3);
+        fmBackup.createEpic(epic3);
+        fmBackup.createSubtask(subtask4);
+
+        printTaskTest(fmBackup);
+
+
+    }
+
+    static void printTaskTest(FileBackedTaskManager fbm) {
+        for (Task task : fbm.getTaskList()) {
+            System.out.printf("%S %s %S %d || ", task.getName(), task.getDescription(), task.getStatus().name(), task.getId());
+        }
+        System.out.println();
+        for (Epic epic : fbm.getEpicList()) {
+            System.out.printf("%S %s %S %d || ", epic.getName(), epic.getDescription(), epic.getStatus().name(), epic.getId());
+        }
+        System.out.println();
+        for (Subtask subtask : fbm.getSubtaskList()) {
+            System.out.printf("%S %s %S %d || ", subtask.getName(), subtask.getDescription(), subtask.getStatus(), subtask.getId());
+        }
+        System.out.println("\n");
+    }
 }
