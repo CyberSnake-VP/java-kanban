@@ -1,14 +1,19 @@
 package tasktracker.manager;
 
+import tasktracker.exceptions.ManagerBackupException;
 import tasktracker.exceptions.ManagerSaveException;
+import tasktracker.status.Status;
 import tasktracker.tasks.*;
+
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.Writer;
 import java.io.FileWriter;
-import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -26,9 +31,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());
         } catch (IOException e) {
-            throw new ManagerSaveException("Ошибка записи в файл.");
+            throw new ManagerSaveException("Ошибка при записи в файл. " + e.getMessage());
         }
-
     }
 
     private String getAllTasksToFile() {
@@ -67,6 +71,68 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
 
         return String.join(",", id, type, name, status, description, epicId);
+    }
+
+    private Task fromString(String value) {
+
+        String[] splitStr = value.split(",");
+
+        int id = Integer.parseInt(splitStr[0]);
+        String type = splitStr[1];
+        String name = splitStr[2];
+        Status status = Status.valueOf(splitStr[3]);
+        String description = splitStr[4];
+        int epicId = 0;
+        if(splitStr.length > 5){
+            epicId = Integer.parseInt(splitStr[5]);
+        }
+        switch (type) {
+            case "TASK":
+                Task task = new Task(name, description, status);
+                task.setId(id);
+                return task;
+            case "EPIC":
+                Epic epic = new Epic(name, description);
+                epic.setId(id);
+                epic.setStatus(status);
+                return epic;
+            case "SUBTASK":
+                Subtask subtask = new Subtask(name, description, epics.get(epicId), status);
+                subtask.setId(id);
+                epics.get(epicId).setSubtaskIdList(id);
+                return subtask;
+        }
+
+        return null;
+    }
+
+    private void putTaskInMaps(Task task) {
+       if(task instanceof Epic) {
+           epics.put(task.getId(), (Epic)task);
+       } else if (task instanceof Subtask) {
+           subtasks.put(task.getId(), (Subtask)task);
+       } else {
+           tasks.put(task.getId(), task);
+       }
+    }
+
+    public static FileBackedTaskManager loadFromFile(File file) {
+        try {
+            FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
+            List<String> list = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+
+            for (String s : list) {
+                if(!Character.isDigit(s.charAt(0))) {
+                    continue;
+                }
+                Task task = fileBackedTaskManager.fromString(s);
+                fileBackedTaskManager.putTaskInMaps(task);
+            }
+            return fileBackedTaskManager;
+
+        } catch (IOException e) {
+            throw new ManagerBackupException("Ошибка при восстановлении данных из файла. " + e.getMessage());
+        }
     }
 
     @Override

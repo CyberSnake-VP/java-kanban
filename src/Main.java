@@ -12,20 +12,20 @@ public class Main {
         TaskManager taskManager = Managers.getDefault();
 
 
-        Task task1 = new Task("Выпить чай", "Поставить чайник, на огонь и дождаться когда закипит");
-        Task task2 = new Task("Выпить какао", "Поставить чайник, на огонь и дождаться когда закипит", Status.IN_PROGRESS);
+        Task task1 = new Task("Выпить чай", "Поставить чайник на огонь и дождаться когда закипит");
+        Task task2 = new Task("Выпить какао", "Поставить чайник на огонь и дождаться когда закипит", Status.IN_PROGRESS);
         taskManager.createTask(task1);
         taskManager.createTask(task2);
 
 
         Epic epic1 = new Epic("Переезд", "Отправится домой");
-        Epic epic2 = new Epic("Полет на марс", "Создание новой колонии, освоение планеты");
+        Epic epic2 = new Epic("Полет на марс", "Создание новой колонии освоение планеты");
         taskManager.createEpic(epic1);
         taskManager.createEpic(epic2);
 
-        Subtask subtask1 = new Subtask("Купить билеты", "Выбрать авиакомпанию, подобрать даты", epic1, Status.IN_PROGRESS);
-        Subtask subtask2 = new Subtask("Cобрать багаж", "Найти чемодан, сложить вещи", epic1);
-        Subtask subtask3 = new Subtask("Построить ракету", "Создание ракеты с максимальной полезной нагрузкой", epic1);
+        Subtask subtask1 = new Subtask("Купить билеты", "Выбрать авиакомпанию подобрать даты", epic1, Status.IN_PROGRESS);
+        Subtask subtask2 = new Subtask("Cобрать багаж", "Найти чемодан сложить вещи", epic1);
+        Subtask subtask3 = new Subtask("Построить ракету", "Создание ракеты с максимальной полезной нагрузкой", epic2);
         taskManager.createSubtask(subtask1);
         taskManager.createSubtask(subtask2);
         taskManager.createSubtask(subtask3);
@@ -40,75 +40,19 @@ public class Main {
         fm.createSubtask(subtask2);
         fm.createSubtask(subtask3);
 
+        task1.setName("Поесть борщ");
+        task2.setName("Поесть макароны");
+
+        fm.updateTask(task1);
+        fm.updateTask(task2);
 
 
 
+        FileBackedTaskManager fbm = FileBackedTaskManager.loadFromFile(new File("src/tasktracker/files/data.csv"));
+        System.out.println(fbm.getTaskList());
+        System.out.println(fbm.getEpicList());
+        System.out.println(fbm.getSubtaskList());
 
-//        taskManager.getTask(task1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getTask(task2.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getSubtask(subtask1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getSubtask(subtask2.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getSubtask(subtask3.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getSubtask(subtask1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getSubtask(subtask2.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getTask(task1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getEpic(epic1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getEpic(epic2.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.getTask(task1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.deleteTask(task1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
-//        taskManager.deleteEpic(epic1.getId());
-//        for (Task tasks : taskManager.getHistory()) {
-//            System.out.print(tasks.getName() + " | ");
-//        }
-//        System.out.println();
 
     }
 }
