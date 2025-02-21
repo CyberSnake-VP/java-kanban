@@ -1,6 +1,6 @@
 package tasktracker.enumeration;
 
-public enum TypeTasks {
+public enum Type {
     TASK,
     EPIC,
     SUBTASK

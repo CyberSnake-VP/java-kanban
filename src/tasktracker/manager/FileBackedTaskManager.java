@@ -1,13 +1,12 @@
 package tasktracker.manager;
 
-import tasktracker.enumeration.TypeTasks;
+import tasktracker.enumeration.Type;
 import tasktracker.exceptions.ManagerBackupException;
 import tasktracker.exceptions.ManagerSaveException;
 import tasktracker.enumeration.Status;
 import tasktracker.tasks.*;
 
 import java.io.IOException;
-import java.io.FileNotFoundException;
 import java.io.File;
 import java.io.Writer;
 import java.io.FileWriter;
@@ -29,8 +28,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return data;
     }
 
+    // метод для записи в файл
     public void save() {
-        String taskForWrite = getAllTasksToFile();
+        String taskForWrite = getAllTasksToFile();   // Получаем подготовленный файл для записи со всеми задачами, тип String
         try (Writer fw = new FileWriter(data)) {
             fw.write(taskForWrite);
         } catch (IOException e) {
@@ -38,39 +38,37 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // собираем все задачи из таблиц в строку
     private String getAllTasksToFile() {
-        StringBuilder total = new StringBuilder();
+        StringBuilder result = new StringBuilder();
         String title = "id,type,name,status,description,epic";
-        total.append(title).append("\n");
+        result.append(title).append("\n");       // строка заголовок, будет самой первой
 
         for (Task task : tasks.values()) {
-            String str = toString(task);
-            total.append(str).append("\n");
+            String str = toString(task);        // переводим задачу в строчное представление
+            result.append(str).append("\n");
         }
         for (Task epic : epics.values()) {
             String str = toString(epic);
-            total.append(str).append("\n");
+            result.append(str).append("\n");
         }
         for (Task subtask : subtasks.values()) {
             String str = toString(subtask);
-            total.append(str).append("\n");
+            result.append(str).append("\n");
         }
-        return total.toString();
+        return result.toString();
     }
 
+    // переводим задачу в строчное представление по определенному шаблону(через метод join собираем строку) для записи в файл .csv
     private String toString(Task task) {
         String id = Integer.toString(task.getId());
-        String type = TypeTasks.TASK.name();
+        String type = task.getType().name();     // получаем тип задачи с помощью Enum переменной
         String name = task.getName();
         String description = task.getDescription();
         String status = task.getStatus().toString();
         String epicId = "";
-
-        if (task instanceof Epic) {
-            type = TypeTasks.EPIC.name();
-        } else if (task instanceof Subtask) {
-            type = TypeTasks.SUBTASK.name();
-            epicId = Integer.toString(((Subtask) task).getEpicId());
+        if(type.equals(Type.SUBTASK.name())) {
+            epicId = Integer.toString(((Subtask)task).getEpicId());
         }
 
         return String.join(",", id, type, name, status, description, epicId);
