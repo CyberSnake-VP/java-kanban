@@ -110,12 +110,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // метод для записи задач в таблицу
     private void putTaskInMaps(Task task) {
-        if (task instanceof Epic) {
-            epics.put(task.getId(), (Epic) task);
-        } else if (task instanceof Subtask) {
-            subtasks.put(task.getId(), (Subtask) task);
-        } else {
-            tasks.put(task.getId(), task);
+        Type type = task.getType();   // получаем тип задачи
+        switch (type) {               // кладем задачи в таблицу в соответствии с типом
+            case Type.TASK -> tasks.put(task.getId(), task);
+            case Type.EPIC -> epics.put(task.getId(), (Epic) task);
+            case Type.SUBTASK -> subtasks.put(task.getId(), (Subtask) task);
         }
     }
 
