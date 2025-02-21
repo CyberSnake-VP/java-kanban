@@ -33,8 +33,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String taskForWrite = getAllTasksToFile();
         try (Writer fw = new FileWriter(data)) {
             fw.write(taskForWrite);
-        } catch (FileNotFoundException e) {
-            System.out.println(e.getMessage());
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при записи в файл. " + e.getMessage());
         }
@@ -78,6 +76,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return String.join(",", id, type, name, status, description, epicId);
     }
 
+    // метод для получения задач из строки
     private Task fromString(String value) {
 
         String[] splitStr = value.split(",");
@@ -111,6 +110,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return null;
     }
 
+    // метод для записи задач в таблицу
     private void putTaskInMaps(Task task) {
         if (task instanceof Epic) {
             epics.put(task.getId(), (Epic) task);
