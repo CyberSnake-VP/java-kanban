@@ -67,8 +67,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = task.getDescription();
         String status = task.getStatus().toString();
         String epicId = "";
-        if(type.equals(Type.SUBTASK.name())) {
-            epicId = Integer.toString(((Subtask)task).getEpicId());
+        if (type.equals(Type.SUBTASK.name())) {
+            epicId = Integer.toString(((Subtask) task).getEpicId());
         }
 
         return String.join(",", id, type, name, status, description, epicId);
@@ -118,23 +118,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
+    // Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
     public static FileBackedTaskManager loadFromFile(File file) {
         try {
-            int countId = 0;
+            int countId = 0;     // счетчик для генерации Id для будущий задач.
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
             List<String> listTask = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
 
             for (String s : listTask) {
-                if (!Character.isDigit(s.charAt(0))) {
-                    continue;
+                if (!Character.isDigit(s.charAt(0))) {   // Проверка первого символа строки, если не число,
+                    continue;                            // то значит это строка заголовок
                 }
-                Task task = fileBackedTaskManager.fromString(s);
-                fileBackedTaskManager.putTaskInMaps(task);
+                Task task = fileBackedTaskManager.fromString(s);  // Получаем задачи из строки
+                fileBackedTaskManager.putTaskInMaps(task);        // Записываем задачи в таблицы
 
                 if (countId < task.getId()) {
-                    countId = task.getId();
+                    countId = task.getId();      // находим самый большой id
                 }
             }
+            //записываем нужное начальное значение в поле counterId объекта iteratorId
             fileBackedTaskManager.iteratorId.counterID = countId + 1;
             return fileBackedTaskManager;
 
