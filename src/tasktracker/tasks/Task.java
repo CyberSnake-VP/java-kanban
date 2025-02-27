@@ -1,6 +1,7 @@
 package tasktracker.tasks;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
+import tasktracker.enumeration.Type;
 
 import java.util.Objects;
 
@@ -59,6 +60,11 @@ public class Task {
 
     public Status getStatus() {
         return status;
+    }
+
+    // Получаем тип задачи
+    public Type getType() {
+        return Type.TASK;
     }
 
     @Override

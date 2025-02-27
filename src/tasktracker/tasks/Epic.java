@@ -1,6 +1,7 @@
 package tasktracker.tasks;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
+import tasktracker.enumeration.Type;
 
 import java.util.ArrayList;
 
@@ -18,6 +19,11 @@ public class Epic extends Task {
         this.setSubtaskIdList(epic.getSubtaskIdList());
     }
 
+    // переопределяем метод и получаем тип - Эпик
+    @Override
+    public Type getType() {
+        return Type.EPIC;
+    }
 
     @Override
     public String toString() {

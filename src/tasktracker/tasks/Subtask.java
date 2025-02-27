@@ -1,6 +1,7 @@
 package tasktracker.tasks;
 
-import tasktracker.status.Status;
+import tasktracker.enumeration.Status;
+import tasktracker.enumeration.Type;
 
 public class Subtask extends Task {
     private final int epicId;  // id конкретного эпика, для связывания этой подзадачи с объектом эпик, в рамках которой она создается
@@ -21,8 +22,15 @@ public class Subtask extends Task {
         epicId = epic.getId();
     }
 
+
     public int getEpicId() {
         return epicId;
+    }
+
+    // переопределяем метод для получения типа подзадача
+    @Override
+    public Type getType() {
+        return Type.SUBTASK;
     }
 
     @Override
