@@ -12,6 +12,10 @@ import java.io.Writer;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,28 +85,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private Task fromString(String value) {
 
         String[] splitStr = value.split(",");
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
         int id = Integer.parseInt(splitStr[0]);
         String type = splitStr[1];
         String name = splitStr[2];
         Status status = Status.valueOf(splitStr[3]);
         String description = splitStr[4];
-        int epicId = 0;
-        if (splitStr.length > 5) {
-            epicId = Integer.parseInt(splitStr[5]);
-        }
+        int epicId = (splitStr[5].isBlank())? 0 : Integer.parseInt(splitStr[5]);
+        LocalDateTime startTime = (splitStr[6] == null)? null : LocalDateTime.parse(splitStr[6], formatter);
+        Duration duration = (splitStr[7] == null)? null : Duration.ofMinutes(Integer.parseInt(splitStr[7]));
+        LocalDateTime endTime = (splitStr[8] == null)? null : LocalDateTime.parse(splitStr[8], formatter);
+
         switch (type) {
             case "TASK":
-                Task task = new Task(name, description, status);
+                Task task = new Task(name, description, status, startTime, duration);
                 task.setId(id);
                 return task;
             case "EPIC":
                 Epic epic = new Epic(name, description);
                 epic.setId(id);
                 epic.setStatus(status);
+                epic.setStartTime(startTime);
+                epic.setDuration(duration);
+                epic.setEndTime(endTime);
                 return epic;
             case "SUBTASK":
-                Subtask subtask = new Subtask(name, description, epics.get(epicId), status);
+                Subtask subtask = new Subtask(name, description, epics.get(epicId), status,startTime, duration);
                 subtask.setId(id);
                 epics.get(epicId).setSubtaskIdList(id);
                 return subtask;
@@ -121,7 +129,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    // Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
+//     Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
     public static FileBackedTaskManager loadFromFile(File file) {
         try {
             int countId = 0;     // счетчик для генерации Id для будущий задач.
@@ -239,55 +247,63 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return deletedList;
     }
 
-//    public static void main(String[] args) {
-//        FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
-//
-//        Task task1 = new Task("Задача1", "Действие");
-//        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS);
-//        Task task3 = new Task("Задача3", "Действие");
-//        fm.createTask(task1);
-//        fm.createTask(task2);
-//
-//        Epic epic1 = new Epic("Эпик1", "Действие");
-//        Epic epic2 = new Epic("Эпик2", "Действие");
-//        Epic epic3 = new Epic("Эпик3", "Действие");
-//        fm.createEpic(epic1);
-//        fm.createEpic(epic2);
-//
-//        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS);
-//        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1);
-//        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2);
-//        Subtask subtask4 = new Subtask("Подзадача4", "Эпик2", epic2);
-//        fm.createSubtask(subtask1);
-//        fm.createSubtask(subtask2);
-//        fm.createSubtask(subtask3);
-//
-//        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
-//        System.out.println("Загрузка из файла:");
-//        printTaskTest(fmBackup);
-//
-//        System.out.println("Добавлены новые задачи:");
-//        fmBackup.createTask(task3);
-//        fmBackup.createEpic(epic3);
-//        fmBackup.createSubtask(subtask4);
-//
-//        printTaskTest(fmBackup);
-//
-//
-//    }
-//
-//    static void printTaskTest(FileBackedTaskManager fbm) {
-//        for (Task task : fbm.getTaskList()) {
-//            System.out.printf("%S %s %S %d || ", task.getName(), task.getDescription(), task.getStatus().name(), task.getId());
-//        }
-//        System.out.println();
-//        for (Epic epic : fbm.getEpicList()) {
-//            System.out.printf("%S %s %S %d || ", epic.getName(), epic.getDescription(), epic.getStatus().name(), epic.getId());
-//        }
-//        System.out.println();
-//        for (Subtask subtask : fbm.getSubtaskList()) {
-//            System.out.printf("%S %s %S %d || ", subtask.getName(), subtask.getDescription(), subtask.getStatus(), subtask.getId());
-//        }
-//        System.out.println("\n");
-//    }
+    public static void main(String[] args) {
+        FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
+
+        Task task1 = new Task("Задача1", "Действие", LocalDateTime.now(), Duration.ofMinutes(2232));
+        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 3, 24, 23,20),Duration.ofMinutes(344));
+        Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 4, 22, 3,20),Duration.ofMinutes(1511));
+        fm.createTask(task1);
+        fm.createTask(task2);
+
+        Epic epic1 = new Epic("Эпик1", "Действие");
+        Epic epic2 = new Epic("Эпик2", "Действие");
+        Epic epic3 = new Epic("Эпик3", "Действие");
+        fm.createEpic(epic1);
+        fm.createEpic(epic2);
+
+        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(23232));
+        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1, Duration.ofMinutes(343434));
+        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2, LocalDateTime.of(2026, 3, 5, 1, 45),Duration.ofMinutes(3434));
+
+        fm.createSubtask(subtask1);
+        fm.createSubtask(subtask2);
+        fm.createSubtask(subtask3);
+
+        System.out.println("СОЗДАННЫЕ ЗАДАЧИ:");
+        printTaskTest(fm);
+
+        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
+        System.out.println("ЗАГРУЗКА ИЗ ФАЙЛА:");
+
+        printTaskTest(fmBackup);
+
+        fmBackup.createTask(task3);
+        Epic epicWithID = fmBackup.createEpic(epic3);
+        Subtask subtask4 = new Subtask("Подзадача4", "Эпик4", epicWithID, Duration.ofMinutes(5535));
+        fmBackup.createSubtask(subtask4);
+
+        System.out.println("ДОБАВЛЕНИЕ НОВЫХ ЗАДАЧ:");
+        printTaskTest(fmBackup);
+    }
+    static void printTaskTest(FileBackedTaskManager fbm) {
+        for (Task task : fbm.getTaskList()) {
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-7s минут | завершение: %-15s \n",
+                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
+                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
+        }
+        System.out.println();
+        for (Epic epic : fbm.getEpicList()) {
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-7s минут | завершение: %-15s \n",
+                    epic.getName(), epic.getDescription(), epic.getStatus().name(), epic.getId(),
+                    epic.getStartTimeToString(), epic.getDurationToString(), epic.getEndTimeToString());
+        }
+        System.out.println();
+        for (Subtask subtask : fbm.getSubtaskList()) {
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-7s минут | завершение: %-15s \n",
+                    subtask.getName(), subtask.getDescription(), subtask.getStatus(), subtask.getId(),
+                    subtask.getStartTimeToString(), subtask.getDurationToString(), subtask.getEndTimeToString());
+        }
+        System.out.println("\n");
+    }
 }

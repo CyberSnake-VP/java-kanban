@@ -8,20 +8,6 @@ import java.time.*;
 public class Subtask extends Task {
     private final int epicId;  // id конкретного эпика, для связывания этой подзадачи с объектом эпик, в рамках которой она создается
 
-//    public Subtask(String name, String description, Epic epic, Status status) {
-//        super(name, description, status);
-//        epicId = epic.getId();
-//    }
-//
-//    public Subtask(String name, String description, Epic epic) {
-//        super(name, description, Status.NEW);
-//        epicId = epic.getId();
-//    }
-
-
-
-    //------------------
-    // НОВЫЙ КОНСТРУКТОР!
     public Subtask(String name, String description, Epic epic, Status status, LocalDateTime startTime, Duration duration) {
         super(name, description, status, startTime, duration);
         epicId = epic.getId();
@@ -41,8 +27,6 @@ public class Subtask extends Task {
         this.setId(subtask.getId());
         epicId = epic.getId();
     }
-
-    //-----------
 
     public int getEpicId() {
         return epicId;

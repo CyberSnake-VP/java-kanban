@@ -3,9 +3,7 @@ package tasktracker.manager;
 import tasktracker.enumeration.Status;
 import tasktracker.tasks.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -271,4 +269,9 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
+    // НАПИСАТЬ С ПОМОЩЬЮ ТРИСЕТА ДОБАВИТЬ ПОЛЕ В СЮДА В ТАСК МЕНЕРДЖЕР ТРИ СЕТ
+    @Override
+    public List<Task> getPrioritizedTasks() {
+       return null;
+    }
 }

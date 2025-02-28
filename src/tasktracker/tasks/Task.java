@@ -14,25 +14,8 @@ public class Task {
     private Status status;
     private Duration duration;
     private LocalDateTime startTime;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
 
-
-//    // КОСТРУКТОРЫ НА УДАЛЕНИЕ ---------------------
-//    public Task(String name, String description, Status status) {
-//        this.name = name;
-//        this.description = description;
-//        this.status = status;
-//    }
-//
-//    public Task(String name, String description) {
-//        this.name = name;
-//        this.description = description;
-//        this.status = Status.NEW;
-//    }
-//    // ---------------------
-
-
-    //НОВЫЕ КОНСТРУКТОРЫ
     // Конструктор с временем
     public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.name = name;
@@ -57,7 +40,6 @@ public class Task {
         this.startTime = LocalDateTime.now();
         this.duration = duration;
     }
-    //-----------------------
 
     public Task(Task task) {
         this.name = task.getName();
@@ -129,7 +111,7 @@ public class Task {
 
     public String getDurationToString() {
         if (duration != null) {
-            return duration.toMinutes() + "min";
+            return duration.toMinutes() + "";
         } else {
             return null;
         }
