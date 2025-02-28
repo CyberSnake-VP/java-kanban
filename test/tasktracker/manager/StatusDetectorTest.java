@@ -24,7 +24,7 @@ class StatusDetectorTest {
         taskManager.createSubtask(new Subtask("name", "description", epic, Status.DONE));
         taskManager.createSubtask(new Subtask("name", "description", epic, Status.NEW));
 
-        StatusDetector.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
+        Identifier.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
 
         assertEquals(Status.NEW, epic.getStatus());
 
@@ -34,7 +34,7 @@ class StatusDetectorTest {
     void setEpicStatusShouldBeDone() {
         taskManager.createSubtask(new Subtask("name", "description", epic, Status.DONE));
 
-        StatusDetector.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
+        Identifier.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
 
         assertEquals(Status.DONE, epic.getStatus());
 
@@ -46,7 +46,7 @@ class StatusDetectorTest {
         taskManager.createSubtask(new Subtask("name", "description", epic, Status.DONE));
         taskManager.createSubtask(new Subtask("name", "description", epic, Status.IN_PROGRESS));
 
-        StatusDetector.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
+        Identifier.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
 
         assertEquals(Status.IN_PROGRESS, epic.getStatus());
 

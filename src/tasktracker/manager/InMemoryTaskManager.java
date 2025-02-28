@@ -96,8 +96,8 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean updateEpic(Epic epic) {
         if (epics.containsValue(epic)) {
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем подзадачи эпика
-            StatusDetector.setEpicStatus(epic, epicSubtasksList);             // Обновляем статус эпика по его подзадачам
-
+            Identifier.setEpicStatus(epic, epicSubtasksList);                 // Обновляем статус эпика по его подзадачам
+            Identifier.setEpicTime(epic, getSubtaskListInEpic(epic));         // Обновляем время выполнения у эпика
             epics.put(epic.getId(), new Epic(epic));                          // Записываем копию в таблицу с эпиками
             return true;                                                      // Обновление успешно
         }
@@ -140,6 +140,7 @@ public class InMemoryTaskManager implements TaskManager {
                 historyManager.remove(idSub);                            // Удаляем все подзадачи из истории
             }
             historyManager.remove(epic.getId());                         // Удаляем все эпики из истории
+            epic.setStartTime(null);
         }
 
         epics.clear();                                                    // Очищаем список эпиков
@@ -177,7 +178,8 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setSubtaskIdList(subtask.getId());
         subtasks.put(subtask.getId(), new Subtask(subtask, epic));        // Записываем копию в список подзадач
         ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список подзадач у Эпика
-        StatusDetector.setEpicStatus(epic, epicSubtasksList);             // метод setEpicStatus устанавливает статус эпика
+        Identifier.setEpicStatus(epic, epicSubtasksList);             // метод setEpicStatus устанавливает статус эпика
+        Identifier.setEpicTime(epic, epicSubtasksList);               // Устанавливаем необходимое время выполнения
 
         return subtask;     // Возвращаем объект подзадачи.
     }
@@ -189,7 +191,8 @@ public class InMemoryTaskManager implements TaskManager {
             subtasks.put(subtask.getId(), new Subtask(subtask, epic));       // Кладем копию подзадачи
 
             ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
-            StatusDetector.setEpicStatus(epic, epicSubtaskList);             // Обновляем статус эпика
+            Identifier.setEpicStatus(epic, epicSubtaskList);             // Обновляем статус эпика
+            Identifier.setEpicTime(epic, epicSubtaskList);              // Время выполнения  по подзадачам
             return true;
         }
         return false;
@@ -221,6 +224,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epics.values()) {                            // Пробегаемся по всем эпикам из таблицы
             epic.getSubtaskIdList().clear();                          // Очищаем списки id подзадач у эпиков
             epic.setStatus(Status.NEW);                               // Устанавливаем им статус NEW
+            Identifier.setEpicTime(epic, getSubtaskListInEpic(epic));
         }
         return subtaskList;
     }
@@ -233,8 +237,10 @@ public class InMemoryTaskManager implements TaskManager {
                 historyManager.remove(id);                               // Удаляем подзадачи из истории
                 subtasks.remove(id);                                     // Удаляем подзадачи у эпика из таблицы подзадач
             }
-            epic.setStatus(Status.NEW);                                  // Обновляем статус по умолчанию NEW
-            epic.getSubtaskIdList().clear();                             // Чистим список подзадач у эпика.
+            Epic epicFromMap = epics.get(epic.getId());                  // Получаем объект эпика из мапы и меняем зн-е полей
+            epicFromMap.setStatus(Status.NEW);                                  // Обновляем статус по умолчанию NEW
+            epicFromMap.getSubtaskIdList().clear();                             // Чистим список подзадач у эпика.
+            Identifier.setEpicTime(epicFromMap, getSubtaskListInEpic(epicFromMap)); // Сбрасываем время выполнения в null
 
             return subtask;                                              // Возвращаем список удаленных подзадач
         }
@@ -251,8 +257,8 @@ public class InMemoryTaskManager implements TaskManager {
             subtaskListId.remove((Integer) subtask.getId());             // Удаляем подзадачу по id из списка подзадач у эпика
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список объектов подзадач у эпика
 
-            StatusDetector.setEpicStatus(epic, epicSubtasksList);    // Обновляем статус у эпика
-
+            Identifier.setEpicStatus(epic, epicSubtasksList);    // Обновляем статус у эпика
+            Identifier.setEpicTime(epic, epicSubtasksList);
             historyManager.remove(id);                               // Удаляем подзадачу из истории
             return subtasks.remove(subtask.getId());   // Удаляем задачу из таблицы и возвращаем объект удаленной задачи
         }

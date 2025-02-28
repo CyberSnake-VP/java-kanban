@@ -3,8 +3,8 @@ package tasktracker.tasks;
 import tasktracker.enumeration.Status;
 import tasktracker.enumeration.Type;
 
-import java.time.Duration;
-import java.time.Instant;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class Task {
@@ -13,25 +13,59 @@ public class Task {
     private int id;
     private Status status;
     private Duration duration;
-    private Instant instant;
+    private LocalDateTime startTime;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm");
 
-    public Task(String name, String description, Status status) {
+
+//    // КОСТРУКТОРЫ НА УДАЛЕНИЕ ---------------------
+//    public Task(String name, String description, Status status) {
+//        this.name = name;
+//        this.description = description;
+//        this.status = status;
+//    }
+//
+//    public Task(String name, String description) {
+//        this.name = name;
+//        this.description = description;
+//        this.status = Status.NEW;
+//    }
+//    // ---------------------
+
+
+    //НОВЫЕ КОНСТРУКТОРЫ
+    // Конструктор с временем
+    public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
-    public Task(String name, String description) {
+    public Task(String name, String description, LocalDateTime startTime, Duration duration) {
         this.name = name;
         this.description = description;
         this.status = Status.NEW;
+        this.startTime = startTime;
+        this.duration = duration;
     }
+
+    public Task(String name, String description, Duration duration) {
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+        this.startTime = LocalDateTime.now();
+        this.duration = duration;
+    }
+    //-----------------------
 
     public Task(Task task) {
         this.name = task.getName();
         this.description = task.getDescription();
         this.status = task.getStatus();
         this.id = task.getId();
+        this.duration = task.getDuration();
+        this.startTime = task.getStartTime();
     }
 
     public void setName(String name) {
@@ -50,6 +84,14 @@ public class Task {
         this.id = id;
     }
 
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     public int getId() {
         return id;
     }
@@ -66,19 +108,56 @@ public class Task {
         return status;
     }
 
+    // Добавляем геттеры для получения полей duration и startTime
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    // Методы для получения строки для вывода метода toString у всех задач
+    // с форматированием и проверкой на null для избежания проблем с форматированием
+    public String getStartTimeToString() {
+        if (startTime != null) {
+            return startTime.format(formatter);
+        } else {
+            return null;
+        }
+    }
+
+    public String getDurationToString() {
+        if (duration != null) {
+            return duration.toMinutes() + "min";
+        } else {
+            return null;
+        }
+    }
+
+    public String getEndTimeToString() {
+        if (getEndTime() != null) {
+            return getEndTime().format(formatter);
+        }
+        return null;
+    }
+
+    // Чтобы не было проблем с подсчетом конечного времени, нужно проверить входные данные на null
+    public LocalDateTime getEndTime() {
+        if (startTime != null && duration != null) {
+            return startTime.plus(duration);
+        }
+        return null;
+    }
+
+    // Для удобного отображения времени, создал formatter и сделал его доступным для остальных классов.
+    public DateTimeFormatter getFormatter() {
+        return formatter;
+    }
+
     // Получаем тип задачи
     public Type getType() {
         return Type.TASK;
-    }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", id=" + id +
-                ", status=" + status +
-                '}';
     }
 
     // Перезаписываем equals через поле id
@@ -93,5 +172,18 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", id=" + id +
+                ", status=" + status +
+                ", startTime=" + getStartTimeToString() +
+                ", duration=" + getDurationToString() +
+                ", endTime=" + getEndTimeToString() +
+                '}';
     }
 }
