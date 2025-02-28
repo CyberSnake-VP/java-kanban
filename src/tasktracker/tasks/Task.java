@@ -3,6 +3,8 @@ package tasktracker.tasks;
 import tasktracker.enumeration.Status;
 import tasktracker.enumeration.Type;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
 public class Task {
@@ -10,6 +12,8 @@ public class Task {
     private String description;
     private int id;
     private Status status;
+    private Duration duration;
+    private Instant instant;
 
     public Task(String name, String description, Status status) {
         this.name = name;
