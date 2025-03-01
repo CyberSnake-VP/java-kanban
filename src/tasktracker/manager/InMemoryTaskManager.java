@@ -10,6 +10,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasks = new HashMap<>();                // Используем хеш таблицу для хранения задач
     protected final HashMap<Integer, Epic> epics = new HashMap<>();                // Эпиков
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();          // Подзадач для эпиков
+    protected final Set<Task> tasksPriority = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     protected final IdIterator iteratorId = new IdIterator();                      // Подключаем генератор id
     private final HistoryManager historyManager = Managers.getDefaultHistory();  // Подключаем HistoryManager
@@ -27,7 +28,7 @@ public class InMemoryTaskManager implements TaskManager {
         int id = iteratorId.generateId();           // Генерируем уникальный id
         task.setId(id);                             // Запись id в поле задачи.
         tasks.put(task.getId(), new Task(task));    // Кладем в таблицу копию задачи
-
+        addTaskInPriority(task);                    // Кладем задачу в treeSet для сортировки приоритета по timeStart'у
         return task;                                //Вернем пользователю задачу с заполненным полем id
     }
 
@@ -178,7 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
         ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список подзадач у Эпика
         Identifier.setEpicStatus(epic, epicSubtasksList);             // метод setEpicStatus устанавливает статус эпика
         Identifier.setEpicTime(epic, epicSubtasksList);               // Устанавливаем необходимое время выполнения
-
+        addTaskInPriority(subtask);                                   // Кладем подзадачу в treeSet
         return subtask;     // Возвращаем объект подзадачи.
     }
 
@@ -264,14 +265,20 @@ public class InMemoryTaskManager implements TaskManager {
         return null;
     }
 
+    protected void addTaskInPriority (Task task) {
+        if(task.getStartTime() != null) {
+            tasksPriority.add(task);
+        }
+    }
+
     @Override
     public List<Task> getHistory() {
         return historyManager.getHistory();
     }
 
-    // НАПИСАТЬ С ПОМОЩЬЮ ТРИСЕТА ДОБАВИТЬ ПОЛЕ В СЮДА В ТАСК МЕНЕРДЖЕР ТРИ СЕТ
+    // Получение списка приоритетных задач
     @Override
     public List<Task> getPrioritizedTasks() {
-       return null;
+       return tasksPriority.stream().toList();
     }
 }

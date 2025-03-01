@@ -83,7 +83,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     // метод для получения задач из строки
     private Task fromString(String value) {
-
+        // Собираем строку в массив, получаем значение полей, проверяя на null, для методов parse
         String[] splitStr = value.split(",");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
         int id = Integer.parseInt(splitStr[0]);
@@ -92,14 +92,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         Status status = Status.valueOf(splitStr[3]);
         String description = splitStr[4];
         int epicId = (splitStr[5].isBlank())? 0 : Integer.parseInt(splitStr[5]);
-        LocalDateTime startTime = (splitStr[6] == null)? null : LocalDateTime.parse(splitStr[6], formatter);
-        Duration duration = (splitStr[7] == null)? null : Duration.ofMinutes(Integer.parseInt(splitStr[7]));
-        LocalDateTime endTime = (splitStr[8] == null)? null : LocalDateTime.parse(splitStr[8], formatter);
+        LocalDateTime startTime = (splitStr[6].equals("null"))? null : LocalDateTime.parse(splitStr[6], formatter);
+        Duration duration = (splitStr[7].equals("null"))? null : Duration.ofMinutes(Integer.parseInt(splitStr[7]));
+        LocalDateTime endTime = (splitStr[8].equals("null"))? null : LocalDateTime.parse(splitStr[8], formatter);
 
         switch (type) {
             case "TASK":
                 Task task = new Task(name, description, status, startTime, duration);
                 task.setId(id);
+                addTaskInPriority(task);
                 return task;
             case "EPIC":
                 Epic epic = new Epic(name, description);
@@ -113,6 +114,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Subtask subtask = new Subtask(name, description, epics.get(epicId), status,startTime, duration);
                 subtask.setId(id);
                 epics.get(epicId).setSubtaskIdList(id);
+                addTaskInPriority(subtask);
                 return subtask;
         }
 
@@ -250,7 +252,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
 
-        Task task1 = new Task("Задача1", "Действие", LocalDateTime.now(), Duration.ofMinutes(2232));
+        Task task1 = new Task("Задача1", "Действие", null, Duration.ofMinutes(2232));
         Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 3, 24, 23,20),Duration.ofMinutes(344));
         Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 4, 22, 3,20),Duration.ofMinutes(1511));
         fm.createTask(task1);
@@ -284,7 +286,16 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fmBackup.createSubtask(subtask4);
 
         System.out.println("ДОБАВЛЕНИЕ НОВЫХ ЗАДАЧ:");
+        fmBackup.createTask(new Task("задача4", "описание", LocalDateTime.now(), Duration.ofMinutes(332)));
         printTaskTest(fmBackup);
+
+        System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ");
+        for (Task task : fmBackup.getPrioritizedTasks()) {
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-7s минут | завершение: %-15s \n",
+                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
+                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
+        }
+
     }
     static void printTaskTest(FileBackedTaskManager fbm) {
         for (Task task : fbm.getTaskList()) {
@@ -305,5 +316,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     subtask.getStartTimeToString(), subtask.getDurationToString(), subtask.getEndTimeToString());
         }
         System.out.println("\n");
+
     }
 }

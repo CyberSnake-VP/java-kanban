@@ -71,5 +71,7 @@ class Identifier {
                 .filter(subtask -> subtask.getEndTime() != null)
                 .max(Comparator.comparing(Task::getEndTime))
                 .ifPresent(subtask -> epic.setEndTime(subtask.getEndTime()));
+
     }
+
 }
