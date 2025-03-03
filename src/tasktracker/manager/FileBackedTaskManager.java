@@ -342,6 +342,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
         System.out.println();
         System.out.println("УДАЛЕНИЕ ЗАДАЧИ: ");
+
         fmNew.deleteTask(newTask1.getId());
         System.out.println(newTask1 + "\n");
         System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ ПРИ УДАЛЕНИИ ЗАДАЧИ:");
@@ -350,6 +351,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
                     task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
         }
+
+
 
     }
 
