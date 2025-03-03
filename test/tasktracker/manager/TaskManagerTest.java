@@ -7,6 +7,8 @@ import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,19 +17,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
 
-
-    private TaskManager taskManager;
-    private Task task;
-    private Epic epic;
+    protected T taskManager;
+    protected Task task;
+    protected Epic epic;
+    protected Subtask subtask;
 
     @BeforeEach
-    public void init() {
-        task = new Task("name", "description");
-        epic = new Epic("name", "description");
+    abstract void init();
 
-        taskManager = Managers.getDefault();
+    public Subtask createSubtaskInEpic(Epic epicWithId) {
+        return taskManager.createSubtask(new Subtask("name", "description", epicWithId, LocalDateTime.now(), Duration.ofMinutes(1)));
     }
-
 
     @Test
     void createTask() {
@@ -58,7 +58,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void updateTask() {
         // given
-        Task taskTwo = new Task("name", "description");
+        Task taskTwo = new Task("name", "description", LocalDateTime.now(), Duration.ofMinutes(10));
         Task createdTask = taskManager.createTask(task);
         Task createdTaskForTestingStatusDone = taskManager.createTask(taskTwo);
 
@@ -216,7 +216,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         // given
         final List<Subtask> expectedSubtaskList = new ArrayList<>();
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask expectedSubtask = taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        Subtask expectedSubtask = createSubtaskInEpic(epicWithId);
         expectedSubtaskList.add(expectedSubtask);
 
         // do
@@ -282,7 +282,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         // do
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask expectedSubtask = taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId));
+        Subtask expectedSubtask = taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId, LocalDateTime.now(), Duration.ofMinutes(1)));
         Subtask actualSubtask = taskManager.getSubtask(expectedSubtask.getId());
         Subtask actualCopySubtaskMustBeNull = taskManager.createSubtask(expectedSubtask);
 
@@ -303,7 +303,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         final String expectedName = "expectedName";
         final String expectedDescription = "expectedDescription";
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask subtaskForTesting = taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        Subtask subtaskForTesting = createSubtaskInEpic(epicWithId);
 
         // do
         subtaskForTesting.setName(expectedName);
@@ -326,7 +326,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         // given
         List<Subtask> expectedSubtasksList = new ArrayList<>();
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask expectedSubtask = taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        Subtask expectedSubtask = createSubtaskInEpic(epicWithId);
         expectedSubtasksList.add(expectedSubtask);
 
         // do
@@ -343,7 +343,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void getSubtask() {
         // given
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask expectSubtask = taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        Subtask expectSubtask = createSubtaskInEpic(epicWithId);
 
         // do
         Subtask actualSubtask = taskManager.getSubtask(expectSubtask.getId());
@@ -361,7 +361,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         // do
         Epic epicWithId = taskManager.createEpic(epic);
-        taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        createSubtaskInEpic(epicWithId);
         taskManager.deleteSubtaskList();
 
         // expect
@@ -373,7 +373,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     void deleteSubtask() {
         // given
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask createdSubtask = taskManager.createSubtask(new Subtask("name", "description", epicWithId));
+        Subtask createdSubtask = createSubtaskInEpic(epicWithId);
 
         // do
         taskManager.deleteSubtask(createdSubtask.getId());
@@ -389,7 +389,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         // given
         Task createdTask = taskManager.createTask(task);
         Epic createdEpic = taskManager.createEpic(epic);
-        Subtask createdSubtask = taskManager.createSubtask(new Subtask("name", "description", createdEpic));
+        Subtask createdSubtask = createSubtaskInEpic(createdEpic);
 
         List<Task> expectedHistory = new ArrayList<>();
         expectedHistory.add(createdTask);
@@ -417,7 +417,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         String expectedName = "name";
         String expectedDescription = "description";
         Status expectedStatus = Status.NEW;
-        Task testingTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus));
+        Task testingTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus, LocalDateTime.now(), Duration.ofMinutes(1)));
         taskManager.getTask(testingTask.getId());
 
         // do
@@ -442,7 +442,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         String expectedName = "name";
         String expectedDescription = "description";
         Status expectedStatus = Status.NEW;
-        Task expectedTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus));
+        Task expectedTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus, LocalDateTime.now(), Duration.ofMinutes(1)));
 
         // do
         expectedTask.setName("otherName");
@@ -460,6 +460,27 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(expectedName, actualTask.getName(), "Имена не совпадают");
         assertEquals(expectedDescription, actualTask.getDescription(), "Описание не совпадает");
         assertEquals(expectedStatus, actualTask.getStatus(), "Статусы не совпадают");
+
+    }
+
+    @Test
+    void shouldBeNotSaveTaskWhenStartTimeOrEndTimeIntersectTimeCompletingOtherTasksInPriorityList() {
+        // given
+        Task expectedTask = task;
+        expectedTask.setStartTime(LocalDateTime.of(2025, 1, 1, 12, 0));
+        expectedTask.setDuration(Duration.ofMinutes(60));
+        Task expectedTaskWithId = taskManager.createTask(expectedTask);
+
+        // do
+        Task actualTaskNotGoodTime1 = new Task("", "", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(65));
+        taskManager.createTask(actualTaskNotGoodTime1);
+        Task actualTaskNotGoodTime2 = new Task("", "", LocalDateTime.of(2025, 1, 1, 12, 55), Duration.ofMinutes(60));
+        taskManager.createTask(actualTaskNotGoodTime2);
+
+        // expect
+        assertNotNull(taskManager.getPrioritizedTasks(), "Список не должен быть null");
+        assertEquals(1, taskManager.getPrioritizedTasks().size(), "В списке приоритета должна быть ОДНА задача");
+        assertEquals(expectedTaskWithId, taskManager.getPrioritizedTasks().getFirst(), "Задачи не равны");
 
     }
 

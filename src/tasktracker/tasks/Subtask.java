@@ -12,6 +12,7 @@ public class Subtask extends Task {
         super(name, description, status, startTime, duration);
         epicId = epic.getId();
     }
+
     public Subtask(String name, String description, Epic epic, LocalDateTime startTime, Duration duration) {
         super(name, description, startTime, duration);
         epicId = epic.getId();
@@ -48,7 +49,7 @@ public class Subtask extends Task {
                 ", epicId=" + epicId +
                 ", startTime=" + getStartTimeToString() +
                 ", duration=" + getDurationToString() +
-                ", endTime=" + getEndTimeToString()+
+                ", endTime=" + getEndTimeToString() +
                 '}';
 
     }

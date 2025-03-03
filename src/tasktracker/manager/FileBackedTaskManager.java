@@ -326,7 +326,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
         System.out.println();
         System.out.println("ОБНОВЛЕНИЕ ВРЕМЕНИ У ЗАДАЧИ: ");
-        taskForUpdate1.setStartTime(LocalDateTime.of(2025,1,1,9,0));
+        taskForUpdate1.setStartTime(LocalDateTime.of(2025, 1, 1, 9, 0));
         taskForUpdate3.setStartTime(LocalDateTime.of(2025, 1, 1, 15, 30));
         fmNew.updateTask(taskForUpdate1);
         fmNew.updateTask(taskForUpdate3);
@@ -351,7 +351,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
                     task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
         }
-
 
 
     }

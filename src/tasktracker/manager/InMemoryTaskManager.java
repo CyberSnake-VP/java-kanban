@@ -1,7 +1,7 @@
 package tasktracker.manager;
 
 import tasktracker.enumeration.Status;
-import tasktracker.exceptions.ManagerValidationIsFaled;
+import tasktracker.exceptions.ManagerValidationIsFailed;
 import tasktracker.tasks.*;
 
 import java.util.*;
@@ -291,9 +291,9 @@ public class InMemoryTaskManager implements TaskManager {
             if (task.getStartTime() != null && validateTask(task) && task.getDuration() != null) {
                 tasksPriority.add(task);
             } else {
-                throw new ManagerValidationIsFaled("Опс.. Задача не попала в список приоритета.");
+                throw new ManagerValidationIsFailed("Опс.. Задача не попала в список приоритета.");
             }
-        } catch (ManagerValidationIsFaled e) {
+        } catch (ManagerValidationIsFailed e) {
             System.out.println(e.getMessage() + " " + task.getName() + "\nОбновите задачу с указанием правильного времени, для появлении ее в списке по приоритету.");
 
         }
