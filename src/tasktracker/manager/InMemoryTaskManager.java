@@ -4,13 +4,14 @@ import tasktracker.enumeration.Status;
 import tasktracker.tasks.*;
 
 import java.util.*;
+import java.util.stream.Collector;
 
 
 public class InMemoryTaskManager implements TaskManager {
     protected final HashMap<Integer, Task> tasks = new HashMap<>();                // Используем хеш таблицу для хранения задач
     protected final HashMap<Integer, Epic> epics = new HashMap<>();                // Эпиков
     protected final HashMap<Integer, Subtask> subtasks = new HashMap<>();          // Подзадач для эпиков
-    protected final Set<Task> tasksPriority = new TreeSet<>(Comparator.comparing(Task::getStartTime));
+    protected final Set<Task> tasksPriority = new TreeSet<>(Comparator.comparing(Task::getStartTime)); // Задачи по приоритету
 
     protected final IdIterator iteratorId = new IdIterator();                      // Подключаем генератор id
     private final HistoryManager historyManager = Managers.getDefaultHistory();  // Подключаем HistoryManager
@@ -28,18 +29,20 @@ public class InMemoryTaskManager implements TaskManager {
         int id = iteratorId.generateId();           // Генерируем уникальный id
         task.setId(id);                             // Запись id в поле задачи.
         tasks.put(task.getId(), new Task(task));    // Кладем в таблицу копию задачи
-        addTaskInPriority(task);                    // Кладем задачу в treeSet для сортировки приоритета по timeStart'у
+        addTaskInPriority(new Task(task));                    // Кладем задачу в treeSet для сортировки приоритета по timeStart'у
         return task;                                //Вернем пользователю задачу с заполненным полем id
     }
 
     @Override
     public boolean updateTask(Task task) {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
         if (tasks.containsValue(task)) {
+            
             tasks.put(task.getId(), new Task(task)); // Записываем копию задачи в таблицу, возвращаем true;
             return true;
         }
         return false;
     }
+    /**Копия задач в приоритет кладется, чтобы с помощью setStartTime() не изменить вручную время, чтобы не сломать логику*/
 
     //Получаем список задач, в конструктор ArrayList(положим коллекцию, которую вернет метод Values())
     @Override
@@ -65,12 +68,14 @@ public class InMemoryTaskManager implements TaskManager {
         for (Integer id : tasks.keySet()) {
             historyManager.remove(id);                               // Получаем id задачи из таблицы и удаляем задачу из истории
         }
+        tasksPriority.clear();                                       // Очищаем список приоритета
         tasks.clear();                                               // Удаляем список задач. Возвращаем список удаленных задач
         return taskList;
     }
 
     @Override
     public Task deleteTask(int id) {
+        tasksPriority.remove(tasks.get(id));                        // Удаляем задачу из списка приоритета
         historyManager.remove(id);                                  // Удаляем задачу из истории
         return tasks.remove(id);                                    // Удаляем задачу по id из таблицы
     }
@@ -136,6 +141,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         for (Epic epic : epics.values()) {                                 // Пробегаемся по эпиками, получаем список их подзадач
             for (Integer idSub : epic.getSubtaskIdList()) {
+                tasksPriority.remove(subtasks.get(idSub));               // Удаляем все подзадачи из списка приоритета
                 historyManager.remove(idSub);                            // Удаляем все подзадачи из истории
             }
             historyManager.remove(epic.getId());                         // Удаляем все эпики из истории
@@ -152,6 +158,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(id)) {
             final Epic epic = epics.get(id);
             for (Integer subId : epic.getSubtaskIdList()) {               // Получаем список id его подзадач
+                tasksPriority.remove(subtasks.get(subId));               // Удаляем все подзадачи из списка приоритета
                 historyManager.remove(subId);                             // Удаляем подзадачу из истории
                 subtasks.remove(subId);                                   // Удаляем его подзадачи из таблицы подзадач
             }
@@ -187,6 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
     public boolean updateSubtask(Subtask subtask) {                          // Обновление подзадачи
         if (subtasks.containsValue(subtask)) {
             Epic epic = epics.get(subtask.getEpicId());
+
             subtasks.put(subtask.getId(), new Subtask(subtask, epic));       // Кладем копию подзадачи
 
             ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
@@ -265,8 +273,8 @@ public class InMemoryTaskManager implements TaskManager {
         return null;
     }
 
-    protected void addTaskInPriority (Task task) {
-        if(task.getStartTime() != null) {
+    protected void addTaskInPriority(Task task) {
+        if (task.getStartTime() != null && validateTask(task)) {
             tasksPriority.add(task);
         }
     }
@@ -279,6 +287,23 @@ public class InMemoryTaskManager implements TaskManager {
     // Получение списка приоритетных задач
     @Override
     public List<Task> getPrioritizedTasks() {
-       return tasksPriority.stream().toList();
+        return tasksPriority.stream().toList();
+    }
+    // Метод для проверки добавляемой задачи на валидацию по времени начала и окончания выполнения
+    private boolean validateTask(Task newTask) {
+        if (getPrioritizedTasks().isEmpty()) {
+            return true;
+        }
+        return getPrioritizedTasks().stream()
+                .allMatch(task -> newTask.getStartTime().isBefore(task.getStartTime()) &&
+                        (newTask.getEndTime().isBefore(task.getStartTime()) || newTask.getEndTime().equals(task.getStartTime()))
+                        || (newTask.getStartTime().isAfter(task.getEndTime()) || newTask.getStartTime().equals(task.getEndTime()))
+                        && newTask.getEndTime().isAfter(task.getEndTime()));
+        /**
+            Идея стрима в том, чтобы пройтись по всем задачам и проверить на условие, что добавляемая задача,
+            по времени начала раньше, чем начало выполнения задачи в списке и время окончания задачи раньше или равное времени
+            начала задачи в списке. И наоборот, начало добавляемой задачи позже или равное окончанию выполенения задачи в списке
+            а так же время окончания задачи позже окончания выполенения задачи из списка.
+         */
     }
 }
