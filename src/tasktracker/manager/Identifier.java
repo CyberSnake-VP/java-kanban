@@ -30,16 +30,17 @@ class Identifier {
         }
         // Все подзадачи со статусом NEW эпик должен иметь статус NEW
         boolean isAllSubtaskStatusNEW = epicSubtasksList.stream().allMatch(subtask -> subtask.getStatus() == Status.NEW);
-        // Все подзадачи со статусом DONE эпик должен иметь статус DONE
-        boolean isAllSubtaskStatusDONE = epicSubtasksList.stream().allMatch(subtask -> subtask.getStatus() == Status.DONE);
         if (isAllSubtaskStatusNEW) {
             epic.setStatus(Status.NEW);
             return;
         }
-        if(isAllSubtaskStatusDONE) {
+        // Все подзадачи со статусом DONE эпик должен иметь статус DONE
+        boolean isAllSubtaskStatusDONE = epicSubtasksList.stream().allMatch(subtask -> subtask.getStatus() == Status.DONE);
+        if (isAllSubtaskStatusDONE) {
             epic.setStatus(Status.DONE);
             return;
         }
+
         epic.setStatus(Status.IN_PROGRESS);
 
     }
@@ -80,9 +81,4 @@ class Identifier {
                 .ifPresent(subtask -> epic.setEndTime(subtask.getEndTime()));
     }
 }
-/**
- * Duration sum = epicSubtasks.stream()
- * .map(subtask::getDuration)
- * .filter(Objects::nonNull)
- * .reduce(Duration.ZERO, Duration::plus);
- */
+
