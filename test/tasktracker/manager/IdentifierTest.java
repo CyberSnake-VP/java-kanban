@@ -25,7 +25,7 @@ class IdentifierTest extends InMemoryTaskManagerTest {
 
         Identifier.setEpicStatus(epicTest, taskManager.getSubtaskListInEpic(epicTest));
 
-        assertEquals(Status.NEW, epicTest.getStatus());
+        assertEquals(Status.IN_PROGRESS, epicTest.getStatus());
 
     }
 

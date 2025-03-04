@@ -263,7 +263,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fm.createEpic(epic1);
         fm.createEpic(epic2);
 
-        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
+        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 50), null);
         Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
         // подзадача пересечется
         Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(65));
@@ -276,82 +276,61 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         printTaskTest(fm);
 
 
-        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
-        System.out.println("ЗАГРУЗКА ИЗ ФАЙЛА:");
-
-        printTaskTest(fmBackup);
-
-        fmBackup.createTask(task3);
-        Epic epicWithID = fmBackup.createEpic(epic3);
-        // Задача пересечется
-        Subtask subtask4 = new Subtask("Подзадача4", "Эпик4", epicWithID, LocalDateTime.of(2025, 1, 1, 13, 30), Duration.ofMinutes(60));
-        fmBackup.createSubtask(subtask4);
-
-        System.out.println("ДОБАВЛЕНИЕ НОВЫХ ЗАДАЧ:");
-        fmBackup.createTask(new Task("задача4", "описание", LocalDateTime.of(2025, 1, 1, 16, 0), Duration.ofMinutes(60)));
-        printTaskTest(fmBackup);
-
-        System.out.println("_".repeat(123) + "\n");
-        System.out.println("ТЕСТИРОВАНИE ПО ПРИОРИТЕТУ С УЧЕТОМ ВАЛИДАЦИИ ПО ПЕРЕСЕЧЕНИЮ ПО ВРЕМЕНИ:");
-
-        FileBackedTaskManager fmNew = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
-        Task newTask1 = new Task("Задача1", "Действие", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
-        Task newTask2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 15, 0), Duration.ofMinutes(60));
-        Task newTask3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 17, 0), Duration.ofMinutes(60));
-        Task taskForUpdate1 = fmNew.createTask(newTask1);
-        fmNew.createTask(newTask2);
-        Task taskForUpdate3 = fmNew.createTask(newTask3);
-
-        Epic newEpic1 = new Epic("Эпик1", "Действие");
-        Epic newEpic2 = new Epic("Эпик2", "Действие");
-        Epic newEpic1WithId = fmNew.createEpic(newEpic1);
-        Epic newEpic2WithId = fmNew.createEpic(newEpic2);
-
-        Subtask newSubtask1 = new Subtask("Подзадача1", "Эпик1", newEpic1WithId, Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
-        Subtask newSubtask2 = new Subtask("Подзадача2", "Эпик1", newEpic1WithId, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
-        // подзадача пересечется
-        Subtask newSubtask3 = new Subtask("Подзадача3", "Эпик2", newEpic2WithId, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(60));
-
-        fmNew.createSubtask(newSubtask1);
-        fmNew.createSubtask(newSubtask2);
-        fmNew.createSubtask(newSubtask3);
-
-        printTaskTest(fmNew);
-
         System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ:");
-        for (Task task : fmNew.getPrioritizedTasks()) {
-            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
-                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
-                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
-        }
-        System.out.println();
-        System.out.println("ОБНОВЛЕНИЕ ВРЕМЕНИ У ЗАДАЧИ: ");
-        taskForUpdate1.setStartTime(LocalDateTime.of(2025, 1, 1, 9, 0));
-        taskForUpdate3.setStartTime(LocalDateTime.of(2025, 1, 1, 15, 30));
-        fmNew.updateTask(taskForUpdate1);
-        fmNew.updateTask(taskForUpdate3);
-        System.out.println("Задача1 с обновлением времени " + taskForUpdate1);
-        System.out.println("Задача3 с обновлением времени " + taskForUpdate3);
-        System.out.println();
-
-        System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ C ОБНОВЛЕНИЕМ ВРЕМЕНИ:");
-        for (Task task : fmNew.getPrioritizedTasks()) {
-            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
-                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
-                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
-        }
-        System.out.println();
-        System.out.println("УДАЛЕНИЕ ЗАДАЧИ: ");
-
-        fmNew.deleteTask(newTask1.getId());
-        System.out.println(newTask1 + "\n");
-        System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ ПРИ УДАЛЕНИИ ЗАДАЧИ:");
-        for (Task task : fmNew.getPrioritizedTasks()) {
+        for (Task task : fm.getPrioritizedTasks()) {
             System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
                     task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
                     task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
         }
 
+//        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
+//        System.out.println("ЗАГРУЗКА ИЗ ФАЙЛА:");
+//
+//        printTaskTest(fmBackup);
+//
+//        fmBackup.createTask(task3);
+//        Epic epicWithID = fmBackup.createEpic(epic3);
+//        // Задача пересечется
+//        Subtask subtask4 = new Subtask("Подзадача4", "Эпик4", epicWithID, LocalDateTime.of(2025, 1, 1, 13, 30), Duration.ofMinutes(60));
+//        fmBackup.createSubtask(subtask4);
+//
+//        System.out.println("ДОБАВЛЕНИЕ НОВЫХ ЗАДАЧ:");
+//        fmBackup.createTask(new Task("задача4", "описание", LocalDateTime.of(2025, 1, 1, 16, 0), Duration.ofMinutes(60)));
+//        printTaskTest(fmBackup);
+//
+//        System.out.println("_".repeat(123) + "\n");
+//        System.out.println("ТЕСТИРОВАНИE ПО ПРИОРИТЕТУ С УЧЕТОМ ВАЛИДАЦИИ ПО ПЕРЕСЕЧЕНИЮ ПО ВРЕМЕНИ:");
+//
+//        FileBackedTaskManager fmNew = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
+//        Task newTask1 = new Task("Задача1", "Действие", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
+//        Task newTask2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 15, 0), Duration.ofMinutes(60));
+//        Task newTask3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 17, 0), Duration.ofMinutes(60));
+//        Task taskForUpdate1 = fmNew.createTask(newTask1);
+//        fmNew.createTask(newTask2);
+//        Task taskForUpdate3 = fmNew.createTask(newTask3);
+//
+//        Epic newEpic1 = new Epic("Эпик1", "Действие");
+//        Epic newEpic2 = new Epic("Эпик2", "Действие");
+//        Epic newEpic1WithId = fmNew.createEpic(newEpic1);
+//        Epic newEpic2WithId = fmNew.createEpic(newEpic2);
+//
+//        Subtask newSubtask1 = new Subtask("Подзадача1", "Эпик1", newEpic1WithId, Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
+//        Subtask newSubtask2 = new Subtask("Подзадача2", "Эпик1", newEpic1WithId, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
+//        // подзадача пересечется
+//        Subtask newSubtask3 = new Subtask("Подзадача3", "Эпик2", newEpic2WithId, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(60));
+//
+//        fmNew.createSubtask(newSubtask1);
+//        fmNew.createSubtask(newSubtask2);
+//        fmNew.createSubtask(newSubtask3);
+//
+//        printTaskTest(fmNew);
+//
+//        System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ:");
+//        for (Task task : fmNew.getPrioritizedTasks()) {
+//            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
+//                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
+//                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
+//        }
 
     }
 

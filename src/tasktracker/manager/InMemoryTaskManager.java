@@ -69,7 +69,7 @@ public class InMemoryTaskManager implements TaskManager {
     public ArrayList<Task> deleteTaskList() {                        // Удаление списка всех задач
         ArrayList<Task> taskList = new ArrayList<>(tasks.values());
         tasks.keySet().forEach(historyManager::remove);              // Очищаем история просмотров
-        tasksPriority.clear();                                       // Очищаем список приоритета
+        tasks.values().forEach(tasksPriority::remove);               // Удаляем задачи из списка приоритета
         tasks.clear();                                               // Удаляем список задач. Возвращаем список удаленных задач
         return taskList;
     }
@@ -288,7 +288,7 @@ public class InMemoryTaskManager implements TaskManager {
      */
     protected void addTaskInPriority(Task task) {
         try {
-            if (task.getStartTime() != null && validateTask(task) && task.getDuration() != null) {
+            if ((task.getStartTime() != null && task.getDuration() != null) && validateTask(task)) {
                 tasksPriority.add(task);
             } else {
                 throw new ManagerValidationIsFailed("Опс.. Задача не попала в список приоритета.");
@@ -307,7 +307,7 @@ public class InMemoryTaskManager implements TaskManager {
     // Получение списка приоритетных задач
     @Override
     public List<Task> getPrioritizedTasks() {
-        return tasksPriority.stream().toList();
+        return new ArrayList<>(getPrioritizedTasks());
     }
 
     // Метод для проверки добавляемой задачи на валидацию по времени начала и окончания выполнения
@@ -323,8 +323,8 @@ public class InMemoryTaskManager implements TaskManager {
         /**
          Идея стрима в том, чтобы пройтись по всем задачам и проверить на условие, что добавляемая задача,
          по времени начала раньше, чем начало выполнения задачи в списке и время окончания задачи раньше или равное времени
-         начала задачи в списке. И наоборот, начало добавляемой задачи позже или равное окончанию выполенения задачи в списке
-         а так же время окончания задачи позже окончания выполенения задачи из списка.
+         начала задачи в списке. И наоборот, начало добавляемой задачи позже или равное окончанию выполнения задачи в списке,
+         а так же время окончания задачи позже окончания выполнения задачи из списка.
          */
     }
 }

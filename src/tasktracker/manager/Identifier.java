@@ -19,26 +19,29 @@ class Identifier {
 
 
     static void setEpicStatus(Epic epic, ArrayList<Subtask> epicSubtasksList) {
+
+        /** если у эпика нет подзадач или все они имеют статус NEW, то статус должен быть NEW.
+         если все подзадачи имеют статус DONE, то и эпик считается завершённым — со статусом DONE.
+         во всех остальных случаях статус должен быть IN_PROGRESS. */
+
         if (epicSubtasksList.isEmpty()) {
             epic.setStatus(Status.NEW);
             return;
         }
-        boolean isNew = false;
-        for (Subtask sub : epicSubtasksList) {
-            switch (sub.getStatus()) {
-                case IN_PROGRESS:
-                    epic.setStatus(Status.IN_PROGRESS);
-                    return;
-                case NEW:
-                    isNew = true;
-                    break;
-            }
+        // Все подзадачи со статусом NEW эпик должен иметь статус NEW
+        boolean isAllSubtaskStatusNEW = epicSubtasksList.stream().allMatch(subtask -> subtask.getStatus() == Status.NEW);
+        // Все подзадачи со статусом DONE эпик должен иметь статус DONE
+        boolean isAllSubtaskStatusDONE = epicSubtasksList.stream().allMatch(subtask -> subtask.getStatus() == Status.DONE);
+        if (isAllSubtaskStatusNEW) {
+            epic.setStatus(Status.NEW);
+            return;
         }
-        if (isNew) {
-            epic.setStatus(Status.NEW);        // Если нет подзадач с IN_PROGRESS, но есть с NEW статус эпика будет NEW
-        } else {
-            epic.setStatus(Status.DONE);       // Тогда в эпике задачи со статусом DONE, делаем статус эпика DONE
+        if(isAllSubtaskStatusDONE) {
+            epic.setStatus(Status.DONE);
+            return;
         }
+        epic.setStatus(Status.IN_PROGRESS);
+
     }
 
     static void setEpicTime(Epic epic, List<Subtask> epicSubtaskList) {
@@ -59,19 +62,27 @@ class Identifier {
                 .min(Comparator.comparing(Task::getStartTime))
                 .ifPresent(subtask -> epic.setStartTime(subtask.getStartTime()));
 
-        epic.setDuration(Duration.ofMinutes(0));  // Обнуляем Duration перед новым подсчетом, и заодно решаем вопрос с возможным null
+        // Обнуляем Duration перед новым подсчетом, и заодно решаем вопрос с возможным null
 
         // Стрим, решает вопрос сложения Duration всех подзадач
-        epicSubtaskList.stream()
-                .filter(subtask -> subtask.getDuration() != null)
-                .forEach(subtask -> epic.setDuration(epic.getDuration().plus(subtask.getDuration())));
+        Duration sum = epicSubtaskList.stream()
+                .map(Subtask::getDuration)
+                .filter(Objects::nonNull)
+                .reduce(Duration.ZERO, Duration::plus);
+        epic.setDuration(sum);
+        /** Reduce считает сумму с указанного начального значения identity, с элементами стрима значениями Duration.
+         *  identity, (duration, duration2)-> duration.plus(duration2) */
 
         // Стрим проверяет endTime у подзадач, находим самую позднюю во выполнению и устанавливаем в поле Epic'а EndTime
         epicSubtaskList.stream()
                 .filter(subtask -> subtask.getEndTime() != null)
                 .max(Comparator.comparing(Task::getEndTime))
                 .ifPresent(subtask -> epic.setEndTime(subtask.getEndTime()));
-
     }
-
 }
+/**
+ * Duration sum = epicSubtasks.stream()
+ * .map(subtask::getDuration)
+ * .filter(Objects::nonNull)
+ * .reduce(Duration.ZERO, Duration::plus);
+ */
