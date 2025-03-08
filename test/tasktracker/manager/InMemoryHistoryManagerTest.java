@@ -6,20 +6,19 @@ import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryHistoryManagerTest {
+class InMemoryHistoryManagerTest extends InMemoryTaskManagerTest {
 
     private HistoryManager historyManager;
-    private Task task;
 
     @BeforeEach
-    void init() {
-        task = new Task("", "");
+    void initHistoryManager() {
         historyManager = Managers.getDefaultHistory();
-
     }
 
     @Test
@@ -27,7 +26,7 @@ class InMemoryHistoryManagerTest {
         // given
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -48,7 +47,7 @@ class InMemoryHistoryManagerTest {
         // given
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -65,7 +64,7 @@ class InMemoryHistoryManagerTest {
 
         // expect
         assertEquals(0, historyManager.getHistory().size(), "Неверная длина списка");
-        ;
+
     }
 
     @Test
@@ -82,7 +81,7 @@ class InMemoryHistoryManagerTest {
     void getHistory() {
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);

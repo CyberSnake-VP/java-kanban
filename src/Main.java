@@ -1,7 +1,4 @@
 
-public class Main {
-
-    public static void main(String[] args) {
-
-    }
-}
+/**
+ * Запуск программы для визуального теста из класса FileBackedTaskManager
+ */

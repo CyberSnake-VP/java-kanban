@@ -12,6 +12,9 @@ import java.io.Writer;
 import java.io.FileWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +44,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     // собираем все задачи из таблиц в строку
     private String getAllTasksToFile() {
         StringBuilder result = new StringBuilder();
-        String title = "id,type,name,status,description,epic";
+        String title = "id,type,name,status,description,epic,startTime,duration,endTime";
         result.append(title).append("\n");       // строка заголовок, будет самой первой
 
         for (Task task : tasks.values()) {
@@ -67,41 +70,50 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         String description = task.getDescription();
         String status = task.getStatus().toString();
         String epicId = "";
+        String startTime = task.getStartTimeToString();
+        String duration = task.getDurationToString();
+        String endTime = task.getEndTimeToString();
         if (type.equals(Type.SUBTASK.name())) {
             epicId = Integer.toString(((Subtask) task).getEpicId());
         }
 
-        return String.join(",", id, type, name, status, description, epicId);
+        return String.join(",", id, type, name, status, description, epicId, startTime, duration, endTime);
     }
 
     // метод для получения задач из строки
     private Task fromString(String value) {
-
+        // Собираем строку в массив, получаем значение полей, проверяя на null, для методов parse
         String[] splitStr = value.split(",");
-
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
         int id = Integer.parseInt(splitStr[0]);
         String type = splitStr[1];
         String name = splitStr[2];
         Status status = Status.valueOf(splitStr[3]);
         String description = splitStr[4];
-        int epicId = 0;
-        if (splitStr.length > 5) {
-            epicId = Integer.parseInt(splitStr[5]);
-        }
+        int epicId = (splitStr[5].isBlank()) ? 0 : Integer.parseInt(splitStr[5]);
+        LocalDateTime startTime = (splitStr[6].equals("null")) ? null : LocalDateTime.parse(splitStr[6], formatter);
+        Duration duration = (splitStr[7].equals("null")) ? null : Duration.ofMinutes(Integer.parseInt(splitStr[7]));
+        LocalDateTime endTime = (splitStr[8].equals("null")) ? null : LocalDateTime.parse(splitStr[8], formatter);
+
         switch (type) {
             case "TASK":
-                Task task = new Task(name, description, status);
+                Task task = new Task(name, description, status, startTime, duration);
                 task.setId(id);
+                addTaskInPriority(task);
                 return task;
             case "EPIC":
                 Epic epic = new Epic(name, description);
                 epic.setId(id);
                 epic.setStatus(status);
+                epic.setStartTime(startTime);
+                epic.setDuration(duration);
+                epic.setEndTime(endTime);
                 return epic;
             case "SUBTASK":
-                Subtask subtask = new Subtask(name, description, epics.get(epicId), status);
+                Subtask subtask = new Subtask(name, description, epics.get(epicId), status, startTime, duration);
                 subtask.setId(id);
                 epics.get(epicId).setSubtaskIdList(id);
+                addTaskInPriority(subtask);
                 return subtask;
         }
 
@@ -118,7 +130,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    // Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
+    //     Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
     public static FileBackedTaskManager loadFromFile(File file) {
         try {
             int countId = 0;     // счетчик для генерации Id для будущий задач.
@@ -239,9 +251,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
 
-        Task task1 = new Task("Задача1", "Действие");
-        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS);
-        Task task3 = new Task("Задача3", "Действие");
+        Task task1 = new Task("Задача1", "Действие", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
+        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(60));
+        Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 0), Duration.ofMinutes(60));
         fm.createTask(task1);
         fm.createTask(task2);
 
@@ -251,40 +263,47 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         fm.createEpic(epic1);
         fm.createEpic(epic2);
 
-        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.IN_PROGRESS);
-        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1);
-        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2);
-        Subtask subtask4 = new Subtask("Подзадача4", "Эпик2", epic2);
+        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.DONE, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
+        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
+        // подзадача пересечется
+        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(65));
+
         fm.createSubtask(subtask1);
         fm.createSubtask(subtask2);
         fm.createSubtask(subtask3);
 
-        FileBackedTaskManager fmBackup = FileBackedTaskManager.loadFromFile(new File("./src/tasktracker/files/data.csv"));
-        System.out.println("Загрузка из файла:");
-        printTaskTest(fmBackup);
+        System.out.println("СОЗДАННЫЕ ЗАДАЧИ:");
 
-        System.out.println("Добавлены новые задачи:");
-        fmBackup.createTask(task3);
-        fmBackup.createEpic(epic3);
-        fmBackup.createSubtask(subtask4);
-
-        printTaskTest(fmBackup);
+        printTaskTest(fm);
 
 
+        System.out.println("ПРИОРИТЕТ ЗАДАЧ НА ВЫПОЛНЕНИЕ:");
+        for (Task task : fm.getPrioritizedTasks()) {
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
+                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
+                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
+        }
     }
 
     static void printTaskTest(FileBackedTaskManager fbm) {
         for (Task task : fbm.getTaskList()) {
-            System.out.printf("%S %s %S %d || ", task.getName(), task.getDescription(), task.getStatus().name(), task.getId());
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
+                    task.getName(), task.getDescription(), task.getStatus().name(), task.getId(),
+                    task.getStartTimeToString(), task.getDurationToString(), task.getEndTimeToString());
         }
         System.out.println();
         for (Epic epic : fbm.getEpicList()) {
-            System.out.printf("%S %s %S %d || ", epic.getName(), epic.getDescription(), epic.getStatus().name(), epic.getId());
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
+                    epic.getName(), epic.getDescription(), epic.getStatus().name(), epic.getId(),
+                    epic.getStartTimeToString(), epic.getDurationToString(), epic.getEndTimeToString());
         }
         System.out.println();
         for (Subtask subtask : fbm.getSubtaskList()) {
-            System.out.printf("%S %s %S %d || ", subtask.getName(), subtask.getDescription(), subtask.getStatus(), subtask.getId());
+            System.out.printf("%-10S | %-8s | статус: %-12S | id%-2d |старт: %-15s | %-3s минут | завершение: %-15s \n",
+                    subtask.getName(), subtask.getDescription(), subtask.getStatus(), subtask.getId(),
+                    subtask.getStartTimeToString(), subtask.getDurationToString(), subtask.getEndTimeToString());
         }
         System.out.println("\n");
+
     }
 }
