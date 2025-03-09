@@ -37,14 +37,14 @@ public class InMemoryTaskManager implements TaskManager {
      * Копия задач в приоритет кладется, чтобы с помощью setStartTime() не изменить вручную время, чтобы не сломать логику
      */
     @Override
-    public boolean updateTask(Task task) {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
+    public Task updateTask(Task task) {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
         if (tasks.containsValue(task)) {
             prioritizedTask.remove(tasks.get(task.getId()));  // Удаляем задачу из приоритета
             addTaskInPriority(new Task(task));              // Кладем обновленную задачу в приоритет
             tasks.put(task.getId(), new Task(task)); // Записываем копию задачи в таблицу, возвращаем true;
-            return true;
+            return task;
         }
-        return false;
+        return null;
     }
 
     //Получаем список задач, в конструктор ArrayList(положим коллекцию, которую вернет метод Values())
@@ -100,15 +100,15 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean updateEpic(Epic epic) {
+    public Epic updateEpic(Epic epic) {
         if (epics.containsValue(epic)) {
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем подзадачи эпика
             Identifier.setEpicStatus(epic, epicSubtasksList);                 // Обновляем статус эпика по его подзадачам
             Identifier.setEpicTime(epic, getSubtaskListInEpic(epic));         // Обновляем время выполнения у эпика
             epics.put(epic.getId(), new Epic(epic));                          // Записываем копию в таблицу с эпиками
-            return true;                                                      // Обновление успешно
+            return epic;                                                      // Обновление успешно
         }
-        return false;
+        return null;
     }
 
     @Override
@@ -195,7 +195,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean updateSubtask(Subtask subtask) {                          // Обновление подзадачи
+    public Subtask updateSubtask(Subtask subtask) {                          // Обновление подзадачи
         if (subtasks.containsValue(subtask)) {
             Epic epic = epics.get(subtask.getEpicId());
             prioritizedTask.remove(subtasks.get(subtask.getId()));             // удаляем подзадачу из приоритета
@@ -204,10 +204,10 @@ public class InMemoryTaskManager implements TaskManager {
 
             ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
             Identifier.setEpicStatus(epic, epicSubtaskList);                 // Обновляем статус эпика
-            Identifier.setEpicTime(epic, epicSubtaskList);                   // Время выполнения  по подзадачам
-            return true;
+            Identifier.setEpicTime(epic, epicSubtaskList);                   // Время выполнения по подзадачам
+            return subtask;
         }
-        return false;
+        return null;
     }
 
     @Override

@@ -12,7 +12,7 @@ public interface TaskManager {
     // Методы для Task
     Task createTask(Task task);
 
-    boolean updateTask(Task task);
+    Task updateTask(Task task);
 
     ArrayList<Task> getTaskList();
 
@@ -25,7 +25,7 @@ public interface TaskManager {
     // Методы для Epic
     Epic createEpic(Epic epic);
 
-    boolean updateEpic(Epic epic);
+    Epic updateEpic(Epic epic);
 
     ArrayList<Epic> getEpicList();
 
@@ -40,7 +40,7 @@ public interface TaskManager {
     // Методы для Subtask
     Subtask createSubtask(Subtask subtask);
 
-    boolean updateSubtask(Subtask subtask);
+    Subtask updateSubtask(Subtask subtask);
 
     ArrayList<Subtask> getSubtaskList();
 
