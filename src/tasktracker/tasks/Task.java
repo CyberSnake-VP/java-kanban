@@ -10,11 +10,10 @@ import java.util.Objects;
 public class Task {
     private String name;
     private String description;
-    private int id;
+    private Integer id;
     private Status status;
     private Duration duration;
     private LocalDateTime startTime;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
 
     // Конструктор с временем
     public Task(String name, String description, Status status, LocalDateTime startTime, Duration duration) {
@@ -103,7 +102,7 @@ public class Task {
     // с форматированием и проверкой на null для избежания проблем с форматированием
     public String getStartTimeToString() {
         if (startTime != null) {
-            return startTime.format(formatter);
+            return startTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm"));
         } else {
             return null;
         }
@@ -119,7 +118,7 @@ public class Task {
 
     public String getEndTimeToString() {
         if (getEndTime() != null) {
-            return getEndTime().format(formatter);
+            return getEndTime().format(DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm"));
         }
         return null;
     }
@@ -134,7 +133,7 @@ public class Task {
 
     // Для удобного отображения времени, создал formatter и сделал его доступным для остальных классов.
     public DateTimeFormatter getFormatter() {
-        return formatter;
+        return DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
     }
 
     // Получаем тип задачи

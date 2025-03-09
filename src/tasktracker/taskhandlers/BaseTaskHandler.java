@@ -13,11 +13,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.Duration;
+
 
 public abstract class BaseTaskHandler implements HttpHandler {
 
     protected TaskManager manager;
     protected Gson jsonMapper;
+    protected final int OK = 200;
+    protected final int CREATED = 201;
+    protected final int NOTE_FOUND = 404;
+    protected final int NOT_ACCEPTABLE = 406;
 
     public BaseTaskHandler(TaskManager manager, Gson jsonMapper) {
         this.manager = manager;
@@ -28,6 +34,7 @@ public abstract class BaseTaskHandler implements HttpHandler {
         this.jsonMapper = new GsonBuilder()
                 .setPrettyPrinting()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 
@@ -54,3 +61,17 @@ class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         return LocalDateTime.parse(jsonReader.nextString(), formatter);
     }
 }
+
+class DurationAdapter extends TypeAdapter<Duration> {
+    @Override
+    public void write(JsonWriter jsonWriter, Duration duration) throws IOException {
+        jsonWriter.value(duration.toMinutes());
+    }
+
+    @Override
+    public Duration read(JsonReader jsonReader) throws IOException {
+        return Duration.parse(jsonReader.nextString());
+    }
+}
+
+
