@@ -32,7 +32,6 @@ public abstract class BaseTaskHandler implements HttpHandler {
 
     private void jsonAdapter(Gson jsonMapper) {
         this.jsonMapper = new GsonBuilder()
-                .setPrettyPrinting()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
@@ -70,7 +69,7 @@ class DurationAdapter extends TypeAdapter<Duration> {
 
     @Override
     public Duration read(JsonReader jsonReader) throws IOException {
-        return Duration.parse(jsonReader.nextString());
+        return Duration.ofMinutes(jsonReader.nextInt());
     }
 }
 

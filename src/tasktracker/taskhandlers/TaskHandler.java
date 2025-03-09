@@ -19,9 +19,10 @@ public class TaskHandler extends BaseTaskHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) {
-        Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
+    public void handle(HttpExchange exchange) throws IOException {
+
         try {
+            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
             switch (endpoint) {
                 case GET_TASKS: {
                     handleGetTaskList(exchange);
@@ -29,9 +30,18 @@ public class TaskHandler extends BaseTaskHandler {
                 }
                 case GET_TASK_ID: {
                     handleGEtTaskById(exchange);
+                    break;
                 }
                 case POST_TASK: {
                     handleCreateOrUpdateTask(exchange);
+                    break;
+                }
+                case DELETE_TASK: {
+                    handleDeleteTaskById(exchange);
+                    break;
+                }
+                case UNKNOWN: {
+                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
                 }
             }
         } catch (IOException e) {
@@ -41,19 +51,33 @@ public class TaskHandler extends BaseTaskHandler {
 
     }
 
+    private void handleDeleteTaskById(HttpExchange exchange) throws IOException {
+        String idStr = exchange.getRequestURI().getPath().split("/")[2];
+        int id = Integer.parseInt(idStr);
+        Task task = manager.deleteTask(id);
+        if (Objects.isNull(task)) {
+            sendResponse(exchange, "Задача с указанным ID не найдена", NOTE_FOUND);
+            return;
+        }
+        String taskJson = jsonMapper.toJson(task);
+        sendResponse(exchange, taskJson, OK);
+
+    }
+
     private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException {
         byte[] bytes = exchange.getRequestBody().readAllBytes();
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
         Task task = jsonMapper.fromJson(jsonBody, Task.class);
         if (task.getId() == 0) {
-             Task taskWithId = manager.createTask(task);
-             String jsonTaskWithId = jsonMapper.toJson(taskWithId);
-             sendResponse(exchange, jsonTaskWithId, CREATED);
-             return;
+            Task taskWithId = manager.createTask(task);
+            String jsonTaskWithId = jsonMapper.toJson(taskWithId);
+            sendResponse(exchange, jsonTaskWithId, CREATED);
+            return;
         }
         Task updateTask = manager.updateTask(task);
         String jsonUpdatedTask = jsonMapper.toJson(updateTask);
         sendResponse(exchange, jsonUpdatedTask, CREATED);
+
     }
 
     private void handleGEtTaskById(HttpExchange exchange) throws IOException {
@@ -90,11 +114,13 @@ public class TaskHandler extends BaseTaskHandler {
                 if (elements.length == 2 && elements[1].equals("tasks")) {
                     return Endpoint.POST_TASK;
                 }
-
+            case "DELETE":
+                if(elements.length == 3 && isNumber(elements[2])) {
+                    return Endpoint.DELETE_TASK;
+                }
+            default:
+                return Endpoint.UNKNOWN;
         }
-
-
-        return Endpoint.UNKNOWN;
     }
 
     public boolean isNumber(String str) {
