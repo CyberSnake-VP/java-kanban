@@ -69,44 +69,43 @@ public class EpicHandler extends BaseTaskHandler {
     }
 
     private void handleCreateOrUpdateEpic(HttpExchange exchange) throws IOException, JsonErrorConverter {
-        /**Создаем эпик, через получение нужных полей из json*/
-       try {
-           byte[] bytes = exchange.getRequestBody().readAllBytes();
-           String jsonBody = new String(bytes, StandardCharsets.UTF_8);
+        /** Создаем эпик, через получение нужных полей из json */
+        try {
+            byte[] bytes = exchange.getRequestBody().readAllBytes();
+            String jsonBody = new String(bytes, StandardCharsets.UTF_8);
 
-           /**Попробовал реализовать валидацию тела запроса, чтобы создать эпик, нужно два поля name и description*/
-           /**Посчитал, что создание эпика с полями name null и description null не целесообразно...*/
-           JsonElement je = JsonParser.parseString(jsonBody);
-           JsonElement name = je.getAsJsonObject().get("name");
-           JsonElement description = je.getAsJsonObject().get("description");
-           if(Objects.isNull(name) || Objects.isNull(description)) {
-               throw new JsonErrorConverter("Неверно указаны epic поля name и description. Проверьте корректность ввода. ");
-           }
+            /** Попробовал реализовать валидацию тела запроса, чтобы создать эпик, нужно два поля name и description */
+            /** Посчитал, что создание эпика с полем name null не целесообразно...*/
+            JsonElement je = JsonParser.parseString(jsonBody);
+            JsonElement name = je.getAsJsonObject().get("name");
+            if (Objects.isNull(name)) {
+                throw new JsonErrorConverter("Неверно указаны epic поля name и description. Проверьте корректность ввода. ");
+            }
 
-           Epic epic = jsonMapper.fromJson(jsonBody, Epic.class);
-           if (epic.getId() == 0) {
-               Epic epicWithId = manager.createEpic(new Epic(epic.getName(), epic.getDescription()));
-               String jsonEpicWithId = jsonMapper.toJson(epicWithId);
-               sendResponse(exchange, jsonEpicWithId, CREATED);
-               return;
-           }
-           /**Обновление эпика, необходимые поля для обновления, имя и описание и id*/
-           Epic epicForUpdate = new Epic(epic.getName(), epic.getDescription());
-           epicForUpdate.setId(epic.getId());
-           Epic epdateEpic = manager.updateEpic(epicForUpdate);
-           if (Objects.nonNull(epdateEpic)) {
-               String jsonUpdatedEpic = jsonMapper.toJson(epdateEpic);
-               sendResponse(exchange, jsonUpdatedEpic, CREATED);
-               return;
-           }
-           sendResponse(exchange, "Эпик с указанным ID не найден", NOTE_FOUND);
-       }catch (JsonSyntaxException e) {
-           throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
-       }catch (DateTimeParseException e) {
-           throw new JsonErrorConverter("Не корректное введение формата даты и времени. Введите дату и время в формате dd-mm-yyyy|hh:mm");
-       } catch (NumberFormatException e) {
-           throw new JsonErrorConverter("Не корректное введение продолжительности минут. Вероятно введенное значение не является числом.");
-       }
+            Epic epic = jsonMapper.fromJson(jsonBody, Epic.class);
+            if (epic.getId() == 0) {
+                Epic epicWithId = manager.createEpic(new Epic(epic.getName(), epic.getDescription()));
+                String jsonEpicWithId = jsonMapper.toJson(epicWithId);
+                sendResponse(exchange, jsonEpicWithId, CREATED);
+                return;
+            }
+            /**Обновление эпика, необходимые поля для обновления, имя и описание и id*/
+            Epic epicForUpdate = new Epic(epic.getName(), epic.getDescription());
+            epicForUpdate.setId(epic.getId());
+            Epic epdateEpic = manager.updateEpic(epicForUpdate);
+            if (Objects.nonNull(epdateEpic)) {
+                String jsonUpdatedEpic = jsonMapper.toJson(epdateEpic);
+                sendResponse(exchange, jsonUpdatedEpic, CREATED);
+                return;
+            }
+            sendResponse(exchange, "Эпик с указанным ID не найден", NOTE_FOUND);
+        } catch (JsonSyntaxException e) {
+            throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
+        } catch (DateTimeParseException e) {
+            throw new JsonErrorConverter("Не корректное введение формата даты и времени. Введите дату и время в формате dd-mm-yyyy|hh:mm");
+        } catch (NumberFormatException e) {
+            throw new JsonErrorConverter("Не корректное введение продолжительности минут. Вероятно введенное значение не является числом.");
+        }
     }
 
     private void handleDeleteEpic(HttpExchange exchange) throws IOException {

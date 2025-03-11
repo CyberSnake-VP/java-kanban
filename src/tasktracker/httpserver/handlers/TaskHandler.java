@@ -89,36 +89,41 @@ public class TaskHandler extends BaseTaskHandler {
              * Парсим тело запроса на элементы JSON, после чего фильтруем на null, записываем значения оставшихся полей
              * в список. Далее получаем актуальную задачу по id, после чего меняем ей значение нужных полей и записываем
              * все изменения через метод updateTask */
-            ArrayList<String> jsonList = new ArrayList<>();
+            ArrayList<String> jsonElementList = new ArrayList<>();
             JsonElement jsonElement = JsonParser.parseString(jsonBody);
             jsonElement.getAsJsonObject().entrySet().stream()
                     .filter(Objects::nonNull)
                     .map(Map.Entry::getKey)
-                    .forEach(jsonList::add);
+                    .filter(id -> !id.equals("id"))
+                    .forEach(jsonElementList::add);
 
             Task taskForUpdate = manager.getTask(task.getId());
+            if (Objects.isNull(taskForUpdate)) {
+                sendResponse(exchange, "Задача с указанным ID не найдена", NOTE_FOUND);
+                return;
+            }
 
-            for (String element : jsonList) {
+            for (String element : jsonElementList) {
                 switch (element) {
                     case "name" -> taskForUpdate.setName(task.getName());
                     case "description" -> taskForUpdate.setDescription(task.getDescription());
-                    case "status" -> taskForUpdate.setStatus(task.getStatus());
+                    case "status" -> {
+                        taskForUpdate.setStatus(task.getStatus());      // Статус задачи важен и не должен быть null
+                        if (Objects.isNull(taskForUpdate.getStatus())) {
+                            throw new JsonErrorConverter("Неверный формат статуса задачи. Формат статуса: NEW, IN_PROGRESS, DONE. ");
+                        }
+                    }
                     case "startTime" -> taskForUpdate.setStartTime(task.getStartTime());
                     case "duration" -> taskForUpdate.setDuration(task.getDuration());
-                    default -> throw new JsonErrorConverter("Неверно указаны поля для внесения изменений в задачу. " +
+                    default -> throw new JsonErrorConverter("Неверно указаны поля для внесения изменений задачи. " +
                             "Проверьте правильность ввода. ");
                 }
             }
-            
+
             Task epdateTask = manager.updateTask(taskForUpdate);
-
-            if (Objects.nonNull(epdateTask)) {
-                String jsonUpdatedTask = jsonMapper.toJson(epdateTask);
-                sendResponse(exchange, jsonUpdatedTask, CREATED);
-            } else {
-                sendResponse(exchange, "Задача с указанным ID не найдена", NOTE_FOUND);
-            }
-
+            String jsonUpdatedTask = jsonMapper.toJson(epdateTask);
+            sendResponse(exchange, jsonUpdatedTask, CREATED);
+            
         } catch (JsonSyntaxException e) {
             throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
         } catch (DateTimeParseException e) {
