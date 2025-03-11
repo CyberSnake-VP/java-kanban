@@ -23,7 +23,6 @@ import java.util.Objects;
 public class HttpTaskServer {
     private static final int PORT = 8080;
 
-
     public static void main(String[] args) throws IOException {
         TaskManager manager = Managers.getDefault();
         Gson jsonMapper = new GsonBuilder()

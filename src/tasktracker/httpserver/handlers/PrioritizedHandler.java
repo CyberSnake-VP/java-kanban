@@ -35,8 +35,8 @@ public class PrioritizedHandler extends BaseTaskHandler {
     }
 
     private void handleGetPrioritized(HttpExchange exchange) throws IOException, JsonErrorConverter {
-        List<Task> history = manager.getHistory();
-        String jsonHistory = jsonMapper.toJson(history);
+        List<Task> prioritizedTasks = manager.getPrioritizedTasks();
+        String jsonHistory = jsonMapper.toJson(prioritizedTasks);
         sendResponse(exchange, jsonHistory, OK);
     }
 

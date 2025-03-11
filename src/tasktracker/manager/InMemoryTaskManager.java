@@ -1,7 +1,7 @@
 package tasktracker.manager;
 
 import tasktracker.enumeration.Status;
-import tasktracker.exceptions.ManagerValidationIsFailed;
+import tasktracker.exceptions.intersectionsException;
 import tasktracker.tasks.*;
 
 import java.util.*;
@@ -290,17 +290,13 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Добавляем задачу в список приоритета, с указанием пользователю, если проверка на валидность не пройдена
      */
-    protected void addTaskInPriority(Task task) {
-        try {
-            if ((task.getStartTime() != null && task.getDuration() != null) && validateTask(task)) {
-                prioritizedTask.add(task);
-            } else {
-                throw new ManagerValidationIsFailed("Опс.. Задача не попала в список приоритета.");
-            }
-        } catch (ManagerValidationIsFailed e) {
-            System.out.println(e.getMessage() + " " + task.getName() + "\nОбновите задачу с указанием правильного времени, для появлении ее в списке по приоритету.");
-
+    protected void addTaskInPriority(Task task) throws intersectionsException {
+        if ((task.getStartTime() != null && task.getDuration() != null) && validateTask(task)) {
+            prioritizedTask.add(task);
+        } else {
+            throw new intersectionsException("Задача не попала в список приоритета. ");
         }
+
     }
 
     @Override
