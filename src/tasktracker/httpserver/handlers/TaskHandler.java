@@ -1,10 +1,6 @@
 package tasktracker.httpserver.handlers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.JsonErrorConverter;
@@ -13,8 +9,8 @@ import tasktracker.tasks.Task;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Objects;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 public class TaskHandler extends BaseTaskHandler {
 
@@ -66,29 +62,69 @@ public class TaskHandler extends BaseTaskHandler {
 
     }
 
-    private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException, JsonErrorConverter{
+    private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException, JsonErrorConverter {
         byte[] bytes = exchange.getRequestBody().readAllBytes();
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
         try {
-            JsonElement je = JsonParser.parseString(jsonBody);
-            JsonElement name = je.getAsJsonObject().get("name");
-            JsonElement description = je.getAsJsonObject().get("description");
-            if(Objects.isNull(name) || Objects.isNull(description)) {
-                throw new JsonErrorConverter("Неверно указаны epic поля name и description. Проверьте корректность ввода. ");
-            }
-
             Task task = jsonMapper.fromJson(jsonBody, Task.class);
             if (task.getId() == 0) {
-                Task taskWithId = manager.createTask(task);
+                /* Проверяем корректность полей в запросе тела Json, задачу можно создать, если верно указать поле name
+                 * Думаю, чтобы создать задачу, нужно хотя бы указать ее название... */
+                JsonElement je = JsonParser.parseString(jsonBody);
+                JsonElement name = je.getAsJsonObject().get("name");
+                if (Objects.isNull(name)) {
+                    throw new JsonErrorConverter("Неверно указано поле name. Задача должна иметь название. Проверьте корректность ввода.");
+                }
+                /* Десереализуем задачу, проверяем id, если его нет, создаем новую задачу, исп-ем поля из объекта.
+                 * Обязательные поле имя, статус будет NEW через конструктор, если есть поля начала и продолжительности
+                 * то они тоже будут инициализированны через конструктор */
+                Task taskWithId = manager.createTask(new Task(task.getName(), task.getDescription(), task.getStartTime(), task.getDuration()));
                 String jsonTaskWithId = jsonMapper.toJson(taskWithId);
                 sendResponse(exchange, jsonTaskWithId, CREATED);
                 return;
             }
-            Task updateTask = manager.updateTask(task);
-            String jsonUpdatedTask = jsonMapper.toJson(updateTask);
-            sendResponse(exchange, jsonUpdatedTask, CREATED);
+
+            /** Для обновления задачи, определяю какие поля были указаны в json запросе, обновляем задачу.
+             * Если не фильтровать поля запроса, то вместе с их обновлением, все остальные поля становятся null
+             * Парсим тело запроса на элементы JSON, после чего фильтруем на null, записываем значения оставшихся полей
+             * в список. Далее получаем актуальную задачу по id, после чего меняем ей значение нужных полей и записываем
+             * все изменения через метод updateTask */
+            ArrayList<String> jsonList = new ArrayList<>();
+            JsonElement jsonElement = JsonParser.parseString(jsonBody);
+            jsonElement.getAsJsonObject().entrySet().stream()
+                    .filter(Objects::nonNull)
+                    .map(Map.Entry::getKey)
+                    .forEach(jsonList::add);
+
+            Task taskForUpdate = manager.getTask(task.getId());
+
+            for (String element : jsonList) {
+                switch (element) {
+                    case "name" -> taskForUpdate.setName(task.getName());
+                    case "description" -> taskForUpdate.setDescription(task.getDescription());
+                    case "status" -> taskForUpdate.setStatus(task.getStatus());
+                    case "startTime" -> taskForUpdate.setStartTime(task.getStartTime());
+                    case "duration" -> taskForUpdate.setDuration(task.getDuration());
+                    default -> throw new JsonErrorConverter("Неверно указаны поля для внесения изменений в задачу. " +
+                            "Проверьте правильность ввода. ");
+                }
+            }
+            
+            Task epdateTask = manager.updateTask(taskForUpdate);
+
+            if (Objects.nonNull(epdateTask)) {
+                String jsonUpdatedTask = jsonMapper.toJson(epdateTask);
+                sendResponse(exchange, jsonUpdatedTask, CREATED);
+            } else {
+                sendResponse(exchange, "Задача с указанным ID не найдена", NOTE_FOUND);
+            }
+
         } catch (JsonSyntaxException e) {
             throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
+        } catch (DateTimeParseException e) {
+            throw new JsonErrorConverter("Не корректное введение формата даты и времени. Введите дату и время в формате dd-mm-yyyy|hh:mm");
+        } catch (NumberFormatException e) {
+            throw new JsonErrorConverter("Не корректное введение продолжительности минут. Вероятно введенное значение не является числом.");
         }
     }
 
@@ -127,7 +163,7 @@ public class TaskHandler extends BaseTaskHandler {
                     return Endpoint.POST_TASK;
                 }
             case "DELETE":
-                if(elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
+                if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
                     return Endpoint.DELETE_TASK;
                 }
             default:

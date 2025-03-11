@@ -6,6 +6,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
+import tasktracker.httpserver.handlers.SubtaskHandler;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
 import tasktracker.httpserver.handlers.EpicHandler;
@@ -48,6 +49,7 @@ public class HttpTaskServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TaskHandler(manager, jsonMapper));
         server.createContext("/epics", new EpicHandler(manager, jsonMapper));
+        server.createContext("/subtasks", new SubtaskHandler(manager, jsonMapper));
 
 
         System.out.println("Сервер запущен на порту: " + PORT);

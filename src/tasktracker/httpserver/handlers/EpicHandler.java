@@ -12,6 +12,7 @@ import tasktracker.tasks.Subtask;
 import java.io.IOException;
 
 import java.nio.charset.StandardCharsets;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,7 +31,7 @@ public class EpicHandler extends BaseTaskHandler {
                     handleGetEpicList(exchange);
                     break;
                 }
-                case GET_EPICS_ID: {
+                case GET_EPIC_ID: {
                     handleGetEPicById(exchange);
                     break;
                 }
@@ -89,7 +90,7 @@ public class EpicHandler extends BaseTaskHandler {
                sendResponse(exchange, jsonEpicWithId, CREATED);
                return;
            }
-           /**Обновление эпика, необходимые поля для обновления, имя и описание.*/
+           /**Обновление эпика, необходимые поля для обновления, имя и описание и id*/
            Epic epicForUpdate = new Epic(epic.getName(), epic.getDescription());
            epicForUpdate.setId(epic.getId());
            Epic epdateEpic = manager.updateEpic(epicForUpdate);
@@ -101,6 +102,10 @@ public class EpicHandler extends BaseTaskHandler {
            sendResponse(exchange, "Эпик с указанным ID не найден", NOTE_FOUND);
        }catch (JsonSyntaxException e) {
            throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
+       }catch (DateTimeParseException e) {
+           throw new JsonErrorConverter("Не корректное введение формата даты и времени. Введите дату и время в формате dd-mm-yyyy|hh:mm");
+       } catch (NumberFormatException e) {
+           throw new JsonErrorConverter("Не корректное введение продолжительности минут. Вероятно введенное значение не является числом.");
        }
     }
 
@@ -143,7 +148,7 @@ public class EpicHandler extends BaseTaskHandler {
                     return Endpoint.GET_EPICS;
                 }
                 if (elements.length == 3 && elements[1].equals("epics") && isNumber(elements[2])) {
-                    return Endpoint.GET_EPICS_ID;
+                    return Endpoint.GET_EPIC_ID;
                 }
                 if (elements.length == 4 && elements[1].equals("epics") && isNumber(elements[2]) && elements[3].equals("subtasks")) {
                     return Endpoint.GET_SUBTASK_EPIC;

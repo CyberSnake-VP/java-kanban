@@ -251,7 +251,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
 
-        Task task1 = new Task("Задача1", "Действие", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
+        Task task1 = new Task("Задача1", null, LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
         Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(60));
         Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 0), Duration.ofMinutes(60));
         fm.createTask(task1);

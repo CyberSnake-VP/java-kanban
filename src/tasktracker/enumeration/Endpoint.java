@@ -6,10 +6,14 @@ public enum Endpoint {
     POST_TASK,
     DELETE_TASK,
     GET_EPICS,
-    GET_EPICS_ID,
+    GET_EPIC_ID,
     GET_SUBTASK_EPIC,
     POST_EPIC,
     DELETE_EPIC,
+    GET_SUBTASK,
+    GET_SUBTASK_ID,
+    POST_SUBTASK,
+    DELETE_SUBTASK,
     UNKNOWN
 
 
