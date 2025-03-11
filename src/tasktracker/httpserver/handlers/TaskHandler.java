@@ -123,7 +123,7 @@ public class TaskHandler extends BaseTaskHandler {
             Task epdateTask = manager.updateTask(taskForUpdate);
             String jsonUpdatedTask = jsonMapper.toJson(epdateTask);
             sendResponse(exchange, jsonUpdatedTask, CREATED);
-            
+
         } catch (JsonSyntaxException e) {
             throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
         } catch (DateTimeParseException e) {

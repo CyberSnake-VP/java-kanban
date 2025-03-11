@@ -6,12 +6,9 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
-import tasktracker.httpserver.handlers.HistoryHandler;
-import tasktracker.httpserver.handlers.SubtaskHandler;
+import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
-import tasktracker.httpserver.handlers.EpicHandler;
-import tasktracker.httpserver.handlers.TaskHandler;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
@@ -45,13 +42,14 @@ public class HttpTaskServer {
 
         manager.createSubtask(new Subtask("подзадача1", "действие", epic1, Duration.ofMinutes(10)));
         manager.createSubtask(new Subtask("подзадача2", "действие", epic1, Duration.ofMinutes(20)));
-
+        System.out.println(manager.getHistory());
 
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TaskHandler(manager, jsonMapper));
         server.createContext("/epics", new EpicHandler(manager, jsonMapper));
         server.createContext("/subtasks", new SubtaskHandler(manager, jsonMapper));
         server.createContext("/history", new HistoryHandler(manager, jsonMapper));
+        server.createContext("/prioritized", new PrioritizedHandler(manager, jsonMapper));
 
 
         System.out.println("Сервер запущен на порту: " + PORT);

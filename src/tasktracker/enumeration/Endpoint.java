@@ -15,7 +15,6 @@ public enum Endpoint {
     POST_SUBTASK,
     DELETE_SUBTASK,
     GET_HISTORY,
+    GET_PRIORITIZED,
     UNKNOWN
-
-
 }

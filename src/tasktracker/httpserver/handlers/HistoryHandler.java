@@ -34,7 +34,7 @@ public class HistoryHandler extends BaseTaskHandler{
         }
     }
 
-    private void handleGetHistory(HttpExchange exchange) throws IOException, JsonErrorConverter{
+    private void handleGetHistory(HttpExchange exchange) throws IOException, JsonErrorConverter {
         List<Task> history = manager.getHistory();
         String jsonHistory = jsonMapper.toJson(history);
         sendResponse(exchange, jsonHistory, OK);
