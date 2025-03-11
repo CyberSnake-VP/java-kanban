@@ -24,6 +24,7 @@ public class Epic extends Task {
         this.setId(epic.getId());
         this.setSubtaskIdList(epic.getSubtaskIdList());
         this.endTime = epic.getEndTime();
+
     }
 
     // переопределяем метод и получаем тип - Эпик

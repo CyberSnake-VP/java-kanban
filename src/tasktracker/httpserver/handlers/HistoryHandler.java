@@ -1,4 +1,4 @@
-package tasktracker.taskhandlers;
+package tasktracker.httpserver.handlers;
 
 //public class HistoryHandler extends BaseTaskHandler{
 //}

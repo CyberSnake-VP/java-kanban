@@ -1,9 +1,13 @@
-package tasktracker.taskhandlers;
+package tasktracker.httpserver.handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
+import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
 import tasktracker.tasks.Task;
 
@@ -41,14 +45,12 @@ public class TaskHandler extends BaseTaskHandler {
                     break;
                 }
                 case UNKNOWN: {
-                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+                    sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
                 }
             }
-        } catch (IOException e) {
-            System.out.println("Ошибка!!!!!");
+        } catch (IOException | JsonErrorConverter e) {
+            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
         }
-
-
     }
 
     private void handleDeleteTaskById(HttpExchange exchange) throws IOException {
@@ -64,20 +66,30 @@ public class TaskHandler extends BaseTaskHandler {
 
     }
 
-    private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException {
+    private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException, JsonErrorConverter{
         byte[] bytes = exchange.getRequestBody().readAllBytes();
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
-        Task task = jsonMapper.fromJson(jsonBody, Task.class);
-        if (task.getId() == 0) {
-            Task taskWithId = manager.createTask(task);
-            String jsonTaskWithId = jsonMapper.toJson(taskWithId);
-            sendResponse(exchange, jsonTaskWithId, CREATED);
-            return;
-        }
-        Task updateTask = manager.updateTask(task);
-        String jsonUpdatedTask = jsonMapper.toJson(updateTask);
-        sendResponse(exchange, jsonUpdatedTask, CREATED);
+        try {
+            JsonElement je = JsonParser.parseString(jsonBody);
+            JsonElement name = je.getAsJsonObject().get("name");
+            JsonElement description = je.getAsJsonObject().get("description");
+            if(Objects.isNull(name) || Objects.isNull(description)) {
+                throw new JsonErrorConverter("Неверно указаны epic поля name и description. Проверьте корректность ввода. ");
+            }
 
+            Task task = jsonMapper.fromJson(jsonBody, Task.class);
+            if (task.getId() == 0) {
+                Task taskWithId = manager.createTask(task);
+                String jsonTaskWithId = jsonMapper.toJson(taskWithId);
+                sendResponse(exchange, jsonTaskWithId, CREATED);
+                return;
+            }
+            Task updateTask = manager.updateTask(task);
+            String jsonUpdatedTask = jsonMapper.toJson(updateTask);
+            sendResponse(exchange, jsonUpdatedTask, CREATED);
+        } catch (JsonSyntaxException e) {
+            throw new JsonErrorConverter("Не корректное тело запроса. Проверьте правильность составления тела JSON запроса.");
+        }
     }
 
     private void handleGEtTaskById(HttpExchange exchange) throws IOException {
@@ -107,7 +119,7 @@ public class TaskHandler extends BaseTaskHandler {
                 if (elements.length == 2 && elements[1].equals("tasks")) {
                     return Endpoint.GET_TASKS;
                 }
-                if (elements.length == 3 && isNumber(elements[2])) {
+                if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
                     return Endpoint.GET_TASK_ID;
                 }
             case "POST":
@@ -115,24 +127,11 @@ public class TaskHandler extends BaseTaskHandler {
                     return Endpoint.POST_TASK;
                 }
             case "DELETE":
-                if(elements.length == 3 && isNumber(elements[2])) {
+                if(elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
                     return Endpoint.DELETE_TASK;
                 }
             default:
                 return Endpoint.UNKNOWN;
         }
     }
-
-    public boolean isNumber(String str) {
-        try {
-            Integer.parseInt(str);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-}
-
-// Вспомогательный класс для определения типа коллекции для Json
-class TaskListTypeToken extends TypeToken<Task> {
 }

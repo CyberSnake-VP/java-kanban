@@ -101,7 +101,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic updateEpic(Epic epic) {
-        if (epics.containsValue(epic)) {
+        if (epics.containsValue(epic)) {                                      // Записываем подзадачи из объекта мапы в эпик,
+            epic.setSubtaskIdList(epics.get(epic.getId()).getSubtaskIdList());// чтобы не обновить эпик с отсутствием задач
             ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем подзадачи эпика
             Identifier.setEpicStatus(epic, epicSubtasksList);                 // Обновляем статус эпика по его подзадачам
             Identifier.setEpicTime(epic, getSubtaskListInEpic(epic));         // Обновляем время выполнения у эпика
