@@ -13,11 +13,11 @@ public abstract class BaseTaskHandler implements HttpHandler {
 
     protected TaskManager manager;
     protected Gson jsonMapper;
-    protected final int OK = 200;
-    protected final int CREATED = 201;
-    protected final int NOTE_FOUND = 404;
-    protected final int NOT_ACCEPTABLE = 406;
-    protected final int SERVER_ERROR = 500;
+    protected static final int OK = 200;
+    protected static final int CREATED = 201;
+    protected static final int NOTE_FOUND = 404;
+    protected static final int NOT_ACCEPTABLE = 406;
+    protected static final int SERVER_ERROR = 500;
 
     public BaseTaskHandler(TaskManager manager, Gson jsonMapper) {
         this.manager = manager;
