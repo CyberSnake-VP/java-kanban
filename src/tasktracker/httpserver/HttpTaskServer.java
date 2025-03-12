@@ -3,7 +3,7 @@ package tasktracker.httpserver;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
-import com.google.gson.reflect.TypeToken;
+
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
@@ -11,10 +11,7 @@ import com.sun.net.httpserver.HttpServer;
 import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
-import tasktracker.tasks.Epic;
-import tasktracker.tasks.Task;
 
-import javax.sound.sampled.Control;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
