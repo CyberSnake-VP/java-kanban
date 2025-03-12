@@ -1,10 +1,11 @@
-package tasktracker.manager.httpservertest;
+package tasktracker.httpservertest;
 
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import tasktracker.tasks.Epic;
+import tasktracker.tasks.Subtask;
 
 import java.io.IOException;
 import java.net.http.HttpRequest;
@@ -51,6 +52,7 @@ public class HttpEpicServerTest extends HttpTaskServerTest {
         HttpResponse<String> response = client.send(createEpic, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, response.statusCode(), "Неверный код при создании эпика. ");
 
+        // Получаем эпик из тела ответа
         HttpRequest getEpic = HttpRequest.newBuilder()
                 .uri(urlEpicById)
                 .GET()
@@ -58,10 +60,10 @@ public class HttpEpicServerTest extends HttpTaskServerTest {
                 .build();
         HttpResponse<String> getEpicResponse = client.send(getEpic, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, getEpicResponse.statusCode(), "Код получения эпика неверный. ");
+        Epic epicInManager = manager.getEpic(1);
+        Epic epicInBody = gson.fromJson(getEpicResponse.body(), Epic.class);
 
-        Epic actualEpic = manager.getEpic(1);
-
-        assertEquals(epic.getName(), actualEpic.getName(), "Эпики не совпадают. ");
+        assertEquals(epicInManager, epicInBody, "Эпики не совпадают. ");
     }
 
     @Test

@@ -1,4 +1,4 @@
-package tasktracker.manager.httpservertest;
+package tasktracker.httpservertest;
 
 import com.google.gson.Gson;
 import tasktracker.enumeration.Status;
@@ -34,7 +34,7 @@ public class HttpTaskServerTest {
     protected URI urlEpicById = URI.create("http://localhost:8080/epics/1");
     protected URI urlEpicSubtask = URI.create("http://localhost:8080/epics/1/subtasks");
     protected URI urlSubtask = URI.create("http://localhost:8080/subtasks");
-    protected URI urlSubtaskById = URI.create("http://localhost:8080/subtasks/1");
+    protected URI urlSubtaskById = URI.create("http://localhost:8080/subtasks/2");
 
     public HttpTaskServerTest() throws IOException {
     }
@@ -103,12 +103,13 @@ public class HttpTaskServerTest {
                 .uri(urlById)
                 .header("Content-Type", "application/json")
                 .build();
-
+       // Получаем задачу из тела ответа и сравниваем
         HttpResponse<String> responseGet = client.send(requestGetTaskById, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, responseGet.statusCode());
-
+        Task taskFromBody = gson.fromJson(responseGet.body(), Task.class);
         Task actualTask = manager.getTask(1);
-        assertEquals("task", actualTask.getName(), "Задачи отличаются.");
+
+        assertEquals(taskFromBody, actualTask, "Задачи отличаются.");
     }
 
     @Test
