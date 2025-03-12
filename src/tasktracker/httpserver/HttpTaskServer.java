@@ -18,9 +18,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class HttpTaskServer {
-    private final TaskManager manager;
     private static HttpServer server;
-    public HttpTaskServer(TaskManager manager) {
+    private final TaskManager manager;
+
+    public HttpTaskServer(TaskManager manager) throws IOException {
         this.manager = manager;
     }
 
@@ -28,20 +29,18 @@ public class HttpTaskServer {
 
     public static void main(String[] args) throws IOException {
         System.out.println("Сервер запущен с порта: " + PORT);
-        start();
+        new HttpTaskServer(Managers.getDefault()).start();
     }
 
     public static Gson getGson() {
-       return new GsonBuilder()
+        return new GsonBuilder()
                 .serializeNulls()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
 
-    public static void start() throws IOException {
-        HttpTaskServer httpTaskServer = new HttpTaskServer(Managers.getDefault());
-        TaskManager manager = httpTaskServer.manager;
+    public void start() throws IOException {
         Gson jsonMapper = getGson();
         server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TaskHandler(manager, jsonMapper));
@@ -52,7 +51,7 @@ public class HttpTaskServer {
         server.start();
     }
 
-    public static void stop() {
+    public void stop() {
         server.stop(1);
     }
 }
