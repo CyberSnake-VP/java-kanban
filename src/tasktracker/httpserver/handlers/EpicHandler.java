@@ -74,12 +74,12 @@ public class EpicHandler extends BaseTaskHandler {
             byte[] bytes = exchange.getRequestBody().readAllBytes();
             String jsonBody = new String(bytes, StandardCharsets.UTF_8);
 
-            /** Попробовал реализовать валидацию тела запроса, чтобы создать эпик, нужно два поля name и description */
-            /** Посчитал, что создание эпика с полем name null не целесообразно...*/
+            /** Попробовал реализовать валидацию тела запроса, чтобы создать эпик, нужно поле name */
+            /** Посчитал, что создание эпика с полем name - null не целесообразно...*/
             JsonElement je = JsonParser.parseString(jsonBody);
             JsonElement name = je.getAsJsonObject().get("name");
             if (Objects.isNull(name)) {
-                throw new JsonErrorConverter("Неверно указаны epic поля name и description. Проверьте корректность ввода. ");
+                throw new JsonErrorConverter("Неверно указаны epic поле name. Проверьте корректность ввода. ");
             }
 
             Epic epic = jsonMapper.fromJson(jsonBody, Epic.class);

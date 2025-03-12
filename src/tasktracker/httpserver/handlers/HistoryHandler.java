@@ -10,7 +10,7 @@ import tasktracker.tasks.Task;
 import java.io.IOException;
 import java.util.List;
 
-public class HistoryHandler extends BaseTaskHandler{
+public class HistoryHandler extends BaseTaskHandler {
 
     public HistoryHandler(TaskManager manager, Gson jsonMapper) {
         super(manager, jsonMapper);

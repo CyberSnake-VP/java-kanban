@@ -98,7 +98,7 @@ public class SubtaskHandler extends BaseTaskHandler {
                     .forEach(jsonList::add);
 
             Subtask subtaskForUpdate = manager.getSubtask(subtask.getId());
-            if(Objects.isNull(subtaskForUpdate)) {
+            if (Objects.isNull(subtaskForUpdate)) {
                 sendResponse(exchange, "Подзадача с указанным ID не найдена", NOTE_FOUND);
             }
             for (String element : jsonList) {
