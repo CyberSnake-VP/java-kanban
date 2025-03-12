@@ -1,7 +1,7 @@
 package tasktracker.manager;
 
 import tasktracker.enumeration.Status;
-import tasktracker.exceptions.intersectionsException;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.tasks.*;
 
 import java.util.*;
@@ -19,7 +19,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     // Методы для Task
     @Override
-    public Task createTask(Task task) {             // Создание задачи
+    public Task createTask(Task task) throws IntersectionsException {             // Создание задачи
         if (tasks.containsValue(task)) {            // Проверяем на наличие задачи в списке задач,
             return null;                            // Если задача уже существует, не создаем ее. Вернем null
         }
@@ -28,19 +28,37 @@ public class InMemoryTaskManager implements TaskManager {
         }
         int id = iteratorId.generateId();           // Генерируем уникальный id
         task.setId(id);                             // Запись id в поле задачи.
+        addTaskInPriority(new Task(task));          // Кладем задачу в treeSet для сортировки приоритета по timeStart'у
         tasks.put(task.getId(), new Task(task));    // Кладем в таблицу копию задачи
-        addTaskInPriority(new Task(task));                    // Кладем задачу в treeSet для сортировки приоритета по timeStart'у
         return task;                                //Вернем пользователю задачу с заполненным полем id
     }
 
     /**
      * Копия задач в приоритет кладется, чтобы с помощью setStartTime() не изменить вручную время, чтобы не сломать логику
+     * При обновлении задачи,
      */
     @Override
-    public Task updateTask(Task task) {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
+    public Task updateTask(Task task) throws IntersectionsException {          // Обновление задачи, если задачи нет, то вернем false, т.е. не обновлена
         if (tasks.containsValue(task)) {
-            prioritizedTask.remove(tasks.get(task.getId()));  // Удаляем задачу из приоритета
-            addTaskInPriority(new Task(task));              // Кладем обновленную задачу в приоритет
+            Optional<Task> taskData = prioritizedTask.stream()       // Вытаскиваем нужную задачу из TreeSet храним как буфер
+                    .filter(element -> element.equals(task))
+                    .findFirst();
+            if (taskData.isPresent()) {                             // Если обновляемая задача уже есть в списке приоритета
+                prioritizedTask.remove(tasks.get(task.getId()));    // Удаляем задачу из приоритета
+                try {
+                    addTaskInPriority(new Task(task));              // Пробуем положить обновленную задачу в приоритет
+                } catch (IntersectionsException e) {                // Если время пересеклось, то выбрасываем исключение
+                    prioritizedTask.add(taskData.get());            // Кладем удаленную задачу обратно в приоритет, обновление неудачно.
+                    throw new IntersectionsException("Не удалось обновить время задачи. Время выполнения пересекается уже с существующими задачами. ");
+                }
+            } else {
+                try {
+                    addTaskInPriority(new Task(task));              // Пробуем положить  обновленную задачу в приоритет
+                } catch (IntersectionsException e) {
+                    throw new IntersectionsException("Не удалось обновить время задачи. Время выполнения пересекается уже с существующими задачами. ");
+                }
+            }
+
             tasks.put(task.getId(), new Task(task)); // Записываем копию задачи в таблицу, возвращаем true;
             return task;
         }
@@ -176,7 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     // Методы для Subtask
     @Override
-    public Subtask createSubtask(Subtask subtask) {
+    public Subtask createSubtask(Subtask subtask) throws IntersectionsException {
         if (subtasks.containsValue(subtask)) {            // Проверка, есть ли уже такая подзадача.
             return null;
         }
@@ -187,22 +205,38 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setId(id);                                // Запись в поле id подзадачи(subtask)
         Epic epic = epics.get(subtask.getEpicId());       // Получение Эпика, из таблицы, к которому привяжем подзадачу.
         epic.setSubtaskIdList(subtask.getId());
+        addTaskInPriority(new Subtask(subtask, epic));                     // Кладем подзадачу в treeSet
         subtasks.put(subtask.getId(), new Subtask(subtask, epic));        // Записываем копию в список подзадач
         ArrayList<Subtask> epicSubtasksList = getSubtaskListInEpic(epic); // Получаем список подзадач у Эпика
         Identifier.setEpicStatus(epic, epicSubtasksList);             // метод setEpicStatus устанавливает статус эпика
         Identifier.setEpicTime(epic, epicSubtasksList);               // Устанавливаем необходимое время выполнения
-        addTaskInPriority(new Subtask(subtask, epic));                                   // Кладем подзадачу в treeSet
         return subtask;     // Возвращаем объект подзадачи.
     }
 
     @Override
-    public Subtask updateSubtask(Subtask subtask) {                          // Обновление подзадачи
+    public Subtask updateSubtask(Subtask subtask) throws IntersectionsException {                          // Обновление подзадачи
         if (subtasks.containsValue(subtask)) {
             Epic epic = epics.get(subtask.getEpicId());
-            prioritizedTask.remove(subtasks.get(subtask.getId()));             // удаляем подзадачу из приоритета
-            addTaskInPriority(new Subtask(subtask, epic));                   // Добавляем обновленную подзадачу в приоритет
-            subtasks.put(subtask.getId(), new Subtask(subtask, epic));       // Кладем копию подзадачи
+            Optional<Task> subtaskData = prioritizedTask.stream()       // Вытаскиваем нужную подзадачу из TreeSet храним как буфер
+                    .filter(element -> element.equals(subtask))
+                    .findFirst();
+            if (subtaskData.isPresent()) {                          // Если обновляемая подзадача уже есть в приоритете
+                prioritizedTask.remove(subtasks.get(subtask.getId()));             // удаляем подзадачу из приоритета
+                try {
+                    addTaskInPriority(new Subtask(subtask, epic));                 // Добавляем обновленную подзадачу в приоритет
+                } catch (IntersectionsException e) {
+                    prioritizedTask.add(subtaskData.get());           // Кладем удаленную задачу обратно в приоритет, обновление неудачно.
+                    throw new IntersectionsException("Не удалось обновить время подзадачи. Время выполнения пересекается уже с существующими задачами. ");
+                }
+            } else {
+                try {
+                    addTaskInPriority(new Subtask(subtask, epic));          // Пробуем добавить обновленную подзадачу в приоритет
+                } catch (IntersectionsException e) {
+                    throw new IntersectionsException("Не удалось обновить время подзадачи. Время выполнения пересекается уже с существующими задачами. ");
+                }
+            }
 
+            subtasks.put(subtask.getId(), new Subtask(subtask, epic));       // Кладем копию подзадачи
             ArrayList<Subtask> epicSubtaskList = getSubtaskListInEpic(epic); // Получаем список подзадач эпика
             Identifier.setEpicStatus(epic, epicSubtaskList);                 // Обновляем статус эпика
             Identifier.setEpicTime(epic, epicSubtaskList);                   // Время выполнения по подзадачам
@@ -290,13 +324,15 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * Добавляем задачу в список приоритета, с указанием пользователю, если проверка на валидность не пройдена
      */
-    protected void addTaskInPriority(Task task) throws intersectionsException {
-        if ((task.getStartTime() != null && task.getDuration() != null) && validateTask(task)) {
+    protected void addTaskInPriority(Task task) throws IntersectionsException {
+        if ((Objects.isNull(task.getStartTime())) || Objects.isNull(task.getDuration())) {
+            return;
+        }
+        if (validateTask(task)) {
             prioritizedTask.add(task);
         } else {
-            throw new intersectionsException("Задача не попала в список приоритета. ");
+            throw new IntersectionsException("В это время задача уже выполняется. Выберете другое время. ");
         }
-
     }
 
     @Override

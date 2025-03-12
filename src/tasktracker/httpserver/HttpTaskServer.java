@@ -6,6 +6,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
@@ -30,19 +31,6 @@ public class HttpTaskServer {
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
-
-        manager.createTask(new Task("задача1", "действие", LocalDateTime.now(), Duration.ofMinutes(15)));
-        manager.createTask(new Task("задача2", "действие", LocalDateTime.now(), Duration.ofMinutes(15)));
-        manager.createTask(new Task("задача3", "действие", LocalDateTime.now(), Duration.ofMinutes(15)));
-        manager.createTask(new Task("задача4", "действие", LocalDateTime.now(), Duration.ofMinutes(15)));
-
-        Epic epic1 = manager.createEpic(new Epic("эпик1", "действие"));
-        manager.createEpic(new Epic("эпик2", "действие"));
-
-        manager.createSubtask(new Subtask("подзадача1", "действие", epic1, Duration.ofMinutes(10)));
-        manager.createSubtask(new Subtask("подзадача2", "действие", epic1, Duration.ofMinutes(20)));
-        System.out.println(manager.getHistory());
-
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TaskHandler(manager, jsonMapper));
         server.createContext("/epics", new EpicHandler(manager, jsonMapper));
@@ -55,7 +43,6 @@ public class HttpTaskServer {
         server.start();
     }
 }
-
 
 class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");

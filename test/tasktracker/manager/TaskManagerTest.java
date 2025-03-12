@@ -73,8 +73,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         createdTask.setStatus(expectedStatusInProgress);
         createdTaskForTestingStatusDone.setStatus(expectedStatusDone);
 
-        taskManager.updateTask(createdTask);
-        taskManager.updateTask(createdTaskForTestingStatusDone);
+        try {
+            taskManager.updateTask(createdTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            taskManager.updateTask(createdTaskForTestingStatusDone);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
 
         Task actualUpdatedTask = taskManager.getTask(createdTask.getId());
         Task actualUpdatedTaskWithStatusDone = taskManager.getTask(createdTaskForTestingStatusDone.getId());
@@ -424,7 +432,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         testingTask.setName("otherName");
         testingTask.setDescription("otherDescription");
         testingTask.setStatus(Status.DONE);
-        taskManager.updateTask(testingTask);
+        try {
+            taskManager.updateTask(testingTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
 
         List<Task> history = taskManager.getHistory();
         Task actualTaskInHistory = history.getFirst();
@@ -449,7 +461,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         expectedTask.setDescription("otherDescription");
         expectedTask.setStatus(Status.DONE);
         Task actualTask = taskManager.getTask(expectedTask.getId());
-        taskManager.updateTask(actualTask);
+        try {
+            taskManager.updateTask(actualTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
         actualTask.setName("otherName");
         actualTask.setDescription("otherDescription");
         actualTask.setStatus(Status.DONE);

@@ -3,6 +3,7 @@ package tasktracker.httpserver.handlers;
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
 import tasktracker.tasks.Task;
@@ -130,6 +131,8 @@ public class TaskHandler extends BaseTaskHandler {
             throw new JsonErrorConverter("Не корректное введение формата даты и времени. Введите дату и время в формате dd-mm-yyyy|hh:mm");
         } catch (NumberFormatException e) {
             throw new JsonErrorConverter("Не корректное введение продолжительности минут. Вероятно введенное значение не является числом.");
+        } catch (IntersectionsException e) {
+            sendResponse(exchange, e.getMessage(), NOT_ACCEPTABLE);
         }
     }
 
