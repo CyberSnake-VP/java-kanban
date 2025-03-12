@@ -3,13 +3,18 @@ package tasktracker.httpserver;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
 import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
+import tasktracker.tasks.Epic;
+import tasktracker.tasks.Task;
 
+import javax.sound.sampled.Control;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.Duration;
@@ -56,6 +61,9 @@ public class HttpTaskServer {
     }
 }
 
+/**
+ * Адаптеры, для форматирования полей времени и продолжительности
+ */
 class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
 
@@ -64,9 +72,14 @@ class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
         jsonWriter.value((Objects.nonNull(dateTime)) ? dateTime.format(formatter) : null);
     }
 
+    // проверяем есть ли null элементы, если есть пропускаем его и выбрасываем null, иначе возвращаем нужный формат.
     @Override
     public LocalDateTime read(JsonReader jsonReader) throws IOException {
-        return (jsonReader.peek() != null) ? LocalDateTime.parse(jsonReader.nextString(), formatter) : null;
+        if (jsonReader.peek() == JsonToken.NULL) {
+            jsonReader.nextNull();
+            return null;
+        }
+        return LocalDateTime.parse(jsonReader.nextString(), formatter);
     }
 }
 
@@ -78,6 +91,10 @@ class DurationAdapter extends TypeAdapter<Duration> {
 
     @Override
     public Duration read(JsonReader jsonReader) throws IOException {
-        return (jsonReader.peek() != null) ? Duration.ofMinutes(jsonReader.nextInt()) : null;
+        if (jsonReader.peek() == JsonToken.NULL) {
+            jsonReader.nextNull();
+            return null;
+        }
+        return Duration.ofMinutes(jsonReader.nextInt());
     }
 }

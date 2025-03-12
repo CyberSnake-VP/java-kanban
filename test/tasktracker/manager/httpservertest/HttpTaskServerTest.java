@@ -24,20 +24,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HttpTaskServerTest {
 
-    private final TaskManager manager = Managers.getDefault();
-    private final HttpTaskServer server = new HttpTaskServer(manager);
-    private final Gson gson = HttpTaskServer.getGson();
-    private final HttpClient client = HttpClient.newHttpClient();
-    private URI url;
-    private URI urlById;
+    protected final TaskManager manager = Managers.getDefault();
+    protected final HttpTaskServer server = new HttpTaskServer(manager);
+    protected final Gson gson = HttpTaskServer.getGson();
+    protected final HttpClient client = HttpClient.newHttpClient();
+    protected URI url = URI.create("http://localhost:8080/tasks");
+    protected URI urlById = URI.create("http://localhost:8080/tasks/1");
+    protected URI urlEpic = URI.create("http://localhost:8080/epics");
+    protected URI urlEpicById = URI.create("http://localhost:8080/epics/1");
+    protected URI urlEpicSubtask = URI.create("http://localhost:8080/epics/1/subtasks");
+    protected URI urlSubtask = URI.create("http://localhost:8080/subtasks");
+    protected URI urlSubtaskById = URI.create("http://localhost:8080/subtasks/1");
 
     public HttpTaskServerTest() throws IOException {
     }
 
     @BeforeEach
     public void setUp() throws IOException {
-        url = URI.create("http://localhost:8080/tasks");
-        urlById = URI.create("http://localhost:8080/tasks/1");
         manager.deleteTaskList();
         manager.deleteSubtaskList();
         manager.deleteEpicList();
@@ -186,7 +189,7 @@ public class HttpTaskServerTest {
     public void updateTask() throws IOException, InterruptedException {
         // создаём задачу
         Task task = new Task("task", "description",
-                Status.NEW, LocalDateTime.of(2000,1,1, 10,0), Duration.ofMinutes(5));
+                Status.NEW, LocalDateTime.of(2000, 1, 1, 10, 0), Duration.ofMinutes(5));
         // конвертируем её в JSON
         String taskJson = gson.toJson(task);
 
@@ -207,7 +210,7 @@ public class HttpTaskServerTest {
         String taskUpdateJson = gson.toJson(taskForUpdate);
 
         HttpRequest updateTask = HttpRequest.newBuilder().
-                 uri(url)
+                uri(url)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(taskUpdateJson))
                 .build();
