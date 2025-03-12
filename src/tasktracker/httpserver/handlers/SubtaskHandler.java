@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
-import tasktracker.enumeration.Status;
 import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
