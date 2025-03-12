@@ -26,7 +26,7 @@ class InMemoryHistoryManagerTest extends InMemoryTaskManagerTest {
         // given
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(0));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -47,7 +47,7 @@ class InMemoryHistoryManagerTest extends InMemoryTaskManagerTest {
         // given
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(0));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);
@@ -81,7 +81,7 @@ class InMemoryHistoryManagerTest extends InMemoryTaskManagerTest {
     void getHistory() {
         Task expectedTask = new Task(task);
         Epic expectedEpic = new Epic("", "");
-        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(1));
+        Subtask expectedSubtask = new Subtask("", "", new Epic("", ""), LocalDateTime.now(), Duration.ofMinutes(0));
         expectedTask.setId(1);
         expectedEpic.setId(2);
         expectedSubtask.setId(3);

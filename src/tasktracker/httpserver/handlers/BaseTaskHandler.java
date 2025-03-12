@@ -29,6 +29,7 @@ public abstract class BaseTaskHandler implements HttpHandler {
         h.getResponseHeaders().add("Content-Type", "application/json;charset=utf-8");
         h.sendResponseHeaders(code, resp.length);
         h.getResponseBody().write(resp);
+        h.getResponseBody().flush();
         h.close();
     }
 

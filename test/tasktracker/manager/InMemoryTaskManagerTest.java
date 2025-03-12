@@ -12,7 +12,7 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<TaskManager> {
 
     @BeforeEach
     void init() {
-        task = new Task("name", "description", LocalDateTime.now(), Duration.ofMinutes(1));
+        task = new Task("name", "description", LocalDateTime.now(), Duration.ofMinutes(0));
         epic = new Epic("name", "description");
 
         taskManager = Managers.getDefault();

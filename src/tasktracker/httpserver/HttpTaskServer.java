@@ -6,7 +6,6 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.sun.net.httpserver.HttpServer;
-import tasktracker.exceptions.IntersectionsException;
 import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
@@ -19,25 +18,42 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class HttpTaskServer {
+    private final TaskManager manager;
+    private static HttpServer server;
+    public HttpTaskServer(TaskManager manager) {
+        this.manager = manager;
+    }
+
     private static final int PORT = 8080;
 
     public static void main(String[] args) throws IOException {
-        TaskManager manager = Managers.getDefault();
-        Gson jsonMapper = new GsonBuilder()
+        System.out.println("Сервер запущен с порта: " + PORT);
+        start();
+    }
+
+    public static Gson getGson() {
+       return new GsonBuilder()
                 .serializeNulls()
                 .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
-        HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
+    }
+
+    public static void start() throws IOException {
+        HttpTaskServer httpTaskServer = new HttpTaskServer(Managers.getDefault());
+        TaskManager manager = httpTaskServer.manager;
+        Gson jsonMapper = getGson();
+        server = HttpServer.create(new InetSocketAddress(PORT), 0);
         server.createContext("/tasks", new TaskHandler(manager, jsonMapper));
         server.createContext("/epics", new EpicHandler(manager, jsonMapper));
         server.createContext("/subtasks", new SubtaskHandler(manager, jsonMapper));
         server.createContext("/history", new HistoryHandler(manager, jsonMapper));
         server.createContext("/prioritized", new PrioritizedHandler(manager, jsonMapper));
-
-
-        System.out.println("Сервер запущен на порту: " + PORT);
         server.start();
+    }
+
+    public static void stop() {
+        server.stop(1);
     }
 }
 
