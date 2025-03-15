@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.httpserver.adapters.DurationAdapter;
 import tasktracker.httpserver.adapters.LocalDateTimeAdapter;
@@ -61,15 +60,15 @@ public class BaseHandler implements HttpHandler {
 
     // В этих методах запускается переопределяемый метод getEndpoint, который запускает необходимый метод для обработки запроса
     protected void processDelete(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        getEndpoint(path, "DELETE", exchange);
+        runProcess(path, "DELETE", exchange);
     }
 
     protected void processPost(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        getEndpoint(path, "POST", exchange);
+        runProcess(path, "POST", exchange);
     }
 
     protected void processGet(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        getEndpoint(path, "GET", exchange);
+        runProcess(path, "GET", exchange);
     }
 
     // Общие методы для переопределения в Hanlder классах
@@ -85,7 +84,8 @@ public class BaseHandler implements HttpHandler {
     protected void handleDeleteById(HttpExchange exchange) throws IOException {
     }
 
-    protected void getEndpoint(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+    protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+
     }
 
     protected void sendResponse(HttpExchange h, String response, Integer code) throws IOException {
