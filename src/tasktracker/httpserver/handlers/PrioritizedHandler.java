@@ -1,7 +1,6 @@
 package tasktracker.httpserver.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
-import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
 import tasktracker.tasks.Task;

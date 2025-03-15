@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
@@ -25,37 +24,28 @@ public class SubtaskHandler extends BaseHandler {
         super(manager);
     }
 
-//    @Override
-//    public void handle(HttpExchange exchange) throws IOException {
-//        try {
-//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-//            switch (endpoint) {
-//                case GET_SUBTASK: {
-//                    handleGetSubtaskList(exchange);
-//                    break;
-//                }
-//                case GET_SUBTASK_ID: {
-//                    handleGetSubtaskById(exchange);
-//                    break;
-//                }
-//                case POST_SUBTASK: {
-//                    handleCreateOrUpdateSubtask(exchange);
-//                    break;
-//                }
-//                case DELETE_SUBTASK: {
-//                    handleDeleteSubtask(exchange);
-//                }
-//                case UNKNOWN: {
-//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-//                }
-//            }
-//        } catch (IOException | JsonErrorConverter e) {
-//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-//        }
-//
-//    }
+    @Override
+    protected void handleGetList(HttpExchange exchange) throws IOException {
+        List<Subtask> list = manager.getSubtaskList();
+        String jsonList = jsonMapper.toJson(list);
+        sendResponse(exchange, jsonList, OK);
+    }
 
-    private void handleCreateOrUpdateSubtask(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    @Override
+    protected void handleGetById(HttpExchange exchange) throws IOException {
+        String idStr = exchange.getRequestURI().getPath().split("/")[2];
+        int id = Integer.parseInt(idStr);
+        Subtask subtask = manager.getSubtask(id);
+        if (Objects.isNull(subtask)) {
+            sendResponse(exchange, "Подзадача с указанным ID не найдена", NOTE_FOUND);
+            return;
+        }
+        String epicJson = jsonMapper.toJson(subtask);
+        sendResponse(exchange, epicJson, OK);
+    }
+
+    @Override
+    protected void handleCreateOrUpdate(HttpExchange exchange) throws IOException, JsonErrorConverter {
         byte[] bytes = exchange.getRequestBody().readAllBytes();
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
 
@@ -131,7 +121,8 @@ public class SubtaskHandler extends BaseHandler {
         }
     }
 
-    private void handleDeleteSubtask(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    @Override
+    protected void handleDeleteById(HttpExchange exchange) throws IOException {
         String idStr = exchange.getRequestURI().getPath().split("/")[2];
         int id = Integer.parseInt(idStr);
         Subtask subtask = manager.deleteSubtask(id);
@@ -143,45 +134,34 @@ public class SubtaskHandler extends BaseHandler {
         sendResponse(exchange, epicJson, OK);
     }
 
-    private void handleGetSubtaskById(HttpExchange exchange) throws IOException, JsonErrorConverter {
-        String idStr = exchange.getRequestURI().getPath().split("/")[2];
-        int id = Integer.parseInt(idStr);
-        Subtask subtask = manager.getSubtask(id);
-        if (Objects.isNull(subtask)) {
-            sendResponse(exchange, "Подзадача с указанным ID не найдена", NOTE_FOUND);
-            return;
+    @Override
+    protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+        String[] elements = path.split("/");
+        boolean isBadPath = false;
+        switch (method) {
+            case "GET":
+                if (elements.length == 2 && elements[1].equals("subtasks")) {
+                    handleGetList(exchange);
+                }
+                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
+                    handleGetById(exchange);
+                }
+                isBadPath = true;
+                break;
+            case "POST":
+                if (elements.length == 2 && elements[1].equals("subtasks")) {
+                    handleCreateOrUpdate(exchange);
+                }
+                isBadPath = true;
+                break;
+            case "DELETE":
+                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
+                    handleDeleteById(exchange);
+                }
+                isBadPath = true;
         }
-        String epicJson = jsonMapper.toJson(subtask);
-        sendResponse(exchange, epicJson, OK);
+        if (isBadPath) {
+            sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+        }
     }
-
-    private void handleGetSubtaskList(HttpExchange exchange) throws IOException, JsonErrorConverter {
-        List<Subtask> list = manager.getSubtaskList();
-        String jsonList = jsonMapper.toJson(list);
-        sendResponse(exchange, jsonList, OK);
-    }
-
-//    private Endpoint getEndpoint(String path, String requestMethod) {
-//        String[] elements = path.split("/");
-//
-//        switch (requestMethod) {
-//            case "GET":
-//                if (elements.length == 2 && elements[1].equals("subtasks")) {
-//                    return Endpoint.GET_SUBTASK;
-//                }
-//                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
-//                    return Endpoint.GET_SUBTASK_ID;
-//                }
-//            case "POST":
-//                if (elements.length == 2 && elements[1].equals("subtasks")) {
-//                    return Endpoint.POST_SUBTASK;
-//                }
-//            case "DELETE":
-//                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
-//                    return Endpoint.DELETE_SUBTASK;
-//                }
-//            default:
-//                return Endpoint.UNKNOWN;
-//        }
-//    }
 }
