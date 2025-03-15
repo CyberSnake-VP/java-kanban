@@ -2,7 +2,6 @@ package tasktracker.httpserver.handlers;
 
 import com.google.gson.*;
 import com.sun.net.httpserver.HttpExchange;
-import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.manager.TaskManager;
@@ -54,7 +53,7 @@ public class TaskHandler extends BaseHandler {
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
         try {
             Task task = jsonMapper.fromJson(jsonBody, Task.class);
-            if(Objects.isNull(task)) {
+            if (Objects.isNull(task)) {
                 throw new JsonErrorConverter("Задача не может быть создана пустой, необходимо заполнить хотя бы одно поле name.");
             }
             if (task.getId() == 0) {
@@ -149,6 +148,7 @@ public class TaskHandler extends BaseHandler {
     @Override
     protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
         String[] elements = path.split("/");
+        boolean isBadPath = false;
         switch (method) {
             case "GET":
                 if (elements.length == 2 && elements[1].equals("tasks")) {
@@ -157,16 +157,23 @@ public class TaskHandler extends BaseHandler {
                 if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
                     handleGetById(exchange);
                 }
+                isBadPath = true;
+                break;
             case "POST":
                 if (elements.length == 2 && elements[1].equals("tasks")) {
                     handleCreateOrUpdate(exchange);
                 }
+                isBadPath = true;
+                break;
             case "DELETE":
                 if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
                     handleDeleteById(exchange);
                 }
-            default:
-                sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+                isBadPath = true;
+                break;
+        }
+        if (isBadPath) {
+            sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
         }
     }
 }
