@@ -1,6 +1,5 @@
 package tasktracker.httpserver.handlers;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -20,10 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SubtaskHandler extends BaseTaskHandler {
+public class SubtaskHandler extends BaseHandler {
 
-    public SubtaskHandler(TaskManager manager, Gson jsonMapper) {
-        super(manager, jsonMapper);
+    public SubtaskHandler(TaskManager manager) {
+        super(manager);
     }
 
     @Override

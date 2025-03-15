@@ -13,10 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
-public class TaskHandler extends BaseTaskHandler {
+public class TaskHandler extends BaseHandler {
 
-    public TaskHandler(TaskManager manager, Gson jsonMapper) {
-        super(manager, jsonMapper);
+    public TaskHandler(TaskManager manager) {
+        super(manager);
     }
 
     @Override

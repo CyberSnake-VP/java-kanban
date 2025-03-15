@@ -1,6 +1,5 @@
 package tasktracker.httpserver.handlers;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.JsonErrorConverter;
@@ -10,10 +9,10 @@ import tasktracker.tasks.Task;
 import java.io.IOException;
 import java.util.List;
 
-public class HistoryHandler extends BaseTaskHandler {
+public class HistoryHandler extends BaseHandler {
 
-    public HistoryHandler(TaskManager manager, Gson jsonMapper) {
-        super(manager, jsonMapper);
+    public HistoryHandler(TaskManager manager) {
+        super(manager);
     }
 
     @Override

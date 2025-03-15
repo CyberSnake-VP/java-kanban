@@ -1,6 +1,5 @@
 package tasktracker.httpserver.handlers;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import tasktracker.enumeration.Endpoint;
 import tasktracker.exceptions.JsonErrorConverter;
@@ -10,10 +9,10 @@ import tasktracker.tasks.Task;
 import java.io.IOException;
 import java.util.List;
 
-public class PrioritizedHandler extends BaseTaskHandler {
+public class PrioritizedHandler extends BaseHandler {
 
-    public PrioritizedHandler(TaskManager manager, Gson jsonMapper) {
-        super(manager, jsonMapper);
+    public PrioritizedHandler(TaskManager manager) {
+        super(manager);
     }
 
     @Override

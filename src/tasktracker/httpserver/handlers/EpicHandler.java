@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class EpicHandler extends BaseTaskHandler {
-    public EpicHandler(TaskManager manager, Gson jsonMapper) {
-        super(manager, jsonMapper);
+public class EpicHandler extends BaseHandler {
+    public EpicHandler(TaskManager manager) {
+        super(manager);
     }
 
     @Override

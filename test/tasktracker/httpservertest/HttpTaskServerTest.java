@@ -3,6 +3,7 @@ package tasktracker.httpservertest;
 import com.google.gson.Gson;
 import tasktracker.enumeration.Status;
 import tasktracker.httpserver.HttpTaskServer;
+import tasktracker.httpserver.handlers.BaseHandler;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
 
@@ -26,7 +27,7 @@ public class HttpTaskServerTest {
 
     protected final TaskManager manager = Managers.getDefault();
     protected final HttpTaskServer server = new HttpTaskServer(manager);
-    protected final Gson gson = HttpTaskServer.getGson();
+    protected final Gson gson = new BaseHandler(manager).getJsonMapper();
     protected final HttpClient client = HttpClient.newHttpClient();
     protected URI url = URI.create("http://localhost:8080/tasks");
     protected URI urlById = URI.create("http://localhost:8080/tasks/1");
