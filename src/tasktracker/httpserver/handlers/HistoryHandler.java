@@ -14,41 +14,25 @@ public class HistoryHandler extends BaseHandler {
         super(manager);
     }
 
-//    @Override
-//    public void handle(HttpExchange exchange) throws IOException {
-//        try {
-//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-//            switch (endpoint) {
-//                case GET_HISTORY: {
-//                    handleGetHistory(exchange);
-//                    break;
-//                }
-//                case UNKNOWN: {
-//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-//                }
-//            }
-//        } catch (IOException | JsonErrorConverter e) {
-//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-//        }
-//    }
-
-    private void handleGetHistory(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    @Override
+    protected void handleGetList(HttpExchange exchange) throws IOException {
         List<Task> history = manager.getHistory();
         String jsonHistory = jsonMapper.toJson(history);
         sendResponse(exchange, jsonHistory, OK);
     }
 
-//    private Endpoint getEndpoint(String path, String requestMethod) {
-//        String[] elements = path.split("/");
-//
-//        switch (requestMethod) {
-//            case "GET":
-//                if (elements.length == 2 && elements[1].equals("history")) {
-//                    return Endpoint.GET_HISTORY;
-//                }
-//            default:
-//                return Endpoint.UNKNOWN;
-//        }
-//    }
+    @Override
+    protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+        String[] elements = path.split("/");
 
+        if (method.equals("GET")) {
+            if (elements.length == 2 && elements[1].equals("history")) {
+                handleGetList(exchange);
+            } else {
+                sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+            }
+        } else {
+            sendResponse(exchange, "Выберите правильный метод, для получения приоритетного списка задач.", METHOD_NOT_ALLOWED);
+        }
+    }
 }

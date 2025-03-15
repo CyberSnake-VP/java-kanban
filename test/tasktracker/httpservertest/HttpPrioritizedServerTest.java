@@ -16,7 +16,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class HttpPrioritizedServerTest extends HttpTaskServerTest{
+public class HttpPrioritizedServerTest extends HttpTaskServerTest {
     public HttpPrioritizedServerTest() throws IOException {
     }
 
@@ -38,10 +38,10 @@ public class HttpPrioritizedServerTest extends HttpTaskServerTest{
 
         // создаём задачу
         Task task2 = new Task("task", "Testing task 2",
-                Status.NEW, LocalDateTime.of(2000, 1, 1, 10,10), Duration.ofMinutes(10));
+                Status.NEW, LocalDateTime.of(2000, 1, 1, 10, 10), Duration.ofMinutes(10));
 
         String task2Json = gson.toJson(task2);
-        HttpRequest createTask2= HttpRequest.newBuilder()
+        HttpRequest createTask2 = HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(task2Json))
@@ -61,7 +61,7 @@ public class HttpPrioritizedServerTest extends HttpTaskServerTest{
 
         Epic epicWithId = manager.getEpic(3);
 
-        Subtask subtask1 = new Subtask("subtask", "description", epicWithId, LocalDateTime.of(2000, 1, 1, 10,20), Duration.ofMinutes(10));
+        Subtask subtask1 = new Subtask("subtask", "description", epicWithId, LocalDateTime.of(2000, 1, 1, 10, 20), Duration.ofMinutes(10));
         String subtaskJson = gson.toJson(subtask1);
 
         HttpRequest createSubtask = HttpRequest.newBuilder()
@@ -71,7 +71,7 @@ public class HttpPrioritizedServerTest extends HttpTaskServerTest{
         HttpResponse<String> createSubtaskResponse1 = client.send(createSubtask, HttpResponse.BodyHandlers.ofString());
         assertEquals(201, createSubtaskResponse1.statusCode());
 
-        Subtask subtask2= new Subtask("subtask", "description", epicWithId, LocalDateTime.of(2000, 1, 1, 10,30), Duration.ofMinutes(10));
+        Subtask subtask2 = new Subtask("subtask", "description", epicWithId, LocalDateTime.of(2000, 1, 1, 10, 30), Duration.ofMinutes(10));
         String subtaskJson2 = gson.toJson(subtask2);
 
         HttpRequest createSubtask2 = HttpRequest.newBuilder()

@@ -15,7 +15,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 
-public class BaseHandler implements HttpHandler {
+public abstract class BaseHandler implements HttpHandler {
 
     protected TaskManager manager;
     protected Gson jsonMapper;
@@ -71,9 +71,10 @@ public class BaseHandler implements HttpHandler {
         runProcess(path, "GET", exchange);
     }
 
-    // Общие методы для переопределения в Hanlder классах
-    protected void handleGetList(HttpExchange exchange) throws IOException {
-    }
+    // Общие методы для переопределения в Hanlder классах, метод getList и runProcess есть во всех класса, сделал абстрактным...
+    abstract void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter;
+
+    abstract void handleGetList(HttpExchange exchange) throws IOException;
 
     protected void handleGetById(HttpExchange exchange) throws IOException {
     }
@@ -82,10 +83,6 @@ public class BaseHandler implements HttpHandler {
     }
 
     protected void handleDeleteById(HttpExchange exchange) throws IOException {
-    }
-
-    protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
-
     }
 
     protected void sendResponse(HttpExchange h, String response, Integer code) throws IOException {
@@ -104,10 +101,6 @@ public class BaseHandler implements HttpHandler {
             return false;
         }
         return true;
-    }
-
-    public Gson getJsonMapper() {
-        return jsonMapper;
     }
 
 }

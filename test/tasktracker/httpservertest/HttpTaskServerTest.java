@@ -1,8 +1,11 @@
 package tasktracker.httpservertest;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import tasktracker.enumeration.Status;
 import tasktracker.httpserver.HttpTaskServer;
+import tasktracker.httpserver.adapters.DurationAdapter;
+import tasktracker.httpserver.adapters.LocalDateTimeAdapter;
 import tasktracker.httpserver.handlers.BaseHandler;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
@@ -27,7 +30,11 @@ public class HttpTaskServerTest {
 
     protected final TaskManager manager = Managers.getDefault();
     protected final HttpTaskServer server = new HttpTaskServer(manager);
-    protected final Gson gson = new BaseHandler(manager).getJsonMapper();
+    protected final Gson gson = new GsonBuilder()
+            .serializeNulls()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .registerTypeAdapter(Duration.class, new DurationAdapter())
+            .create();
     protected final HttpClient client = HttpClient.newHttpClient();
     protected URI url = URI.create("http://localhost:8080/tasks");
     protected URI urlById = URI.create("http://localhost:8080/tasks/1");
@@ -104,7 +111,7 @@ public class HttpTaskServerTest {
                 .uri(urlById)
                 .header("Content-Type", "application/json")
                 .build();
-       // Получаем задачу из тела ответа и сравниваем
+        // Получаем задачу из тела ответа и сравниваем
         HttpResponse<String> responseGet = client.send(requestGetTaskById, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, responseGet.statusCode());
         Task taskFromBody = gson.fromJson(responseGet.body(), Task.class);

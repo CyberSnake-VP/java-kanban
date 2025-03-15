@@ -154,7 +154,7 @@ public class HttpSubtaskServerTest extends HttpTaskServerTest {
                 .build();
         HttpResponse<String> getSubtaskResponse = client.send(getSubtask, HttpResponse.BodyHandlers.ofString());
         assertEquals(200, getSubtaskResponse.statusCode());
-        String body = getSubtaskResponse.body().replace("[", "").replace("]","");
+        String body = getSubtaskResponse.body().replace("[", "").replace("]", "");
         Subtask subtaskInManager = manager.getSubtask(2);
         Subtask subtaskInEpic = gson.fromJson(body, Subtask.class);
 

@@ -19,22 +19,6 @@ public class TaskHandler extends BaseHandler {
     }
 
     @Override
-    protected void processDelete(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        super.processDelete(exchange, path);
-    }
-
-    @Override
-    protected void processPost(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        super.processPost(exchange, path);
-    }
-
-    @Override
-    protected void processGet(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
-        super.processGet(exchange, path);
-    }
-
-
-    @Override
     protected void handleDeleteById(HttpExchange exchange) throws IOException {
         String idStr = exchange.getRequestURI().getPath().split("/")[2];
         int id = Integer.parseInt(idStr);

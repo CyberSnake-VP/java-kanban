@@ -14,40 +14,25 @@ public class PrioritizedHandler extends BaseHandler {
         super(manager);
     }
 
-//    @Override
-//    public void handle(HttpExchange exchange) throws IOException {
-//        try {
-//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-//            switch (endpoint) {
-//                case GET_PRIORITIZED: {
-//                    handleGetPrioritized(exchange);
-//                    break;
-//                }
-//                case UNKNOWN: {
-//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-//                }
-//            }
-//        } catch (IOException | JsonErrorConverter e) {
-//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-//        }
-//    }
-
-    private void handleGetPrioritized(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    @Override
+    protected void handleGetList(HttpExchange exchange) throws IOException {
         List<Task> prioritizedTasks = manager.getPrioritizedTasks();
         String jsonHistory = jsonMapper.toJson(prioritizedTasks);
         sendResponse(exchange, jsonHistory, OK);
     }
 
-//    private Endpoint getEndpoint(String path, String requestMethod) {
-//        String[] elements = path.split("/");
-//
-//        switch (requestMethod) {
-//            case "GET":
-//                if (elements.length == 2 && elements[1].equals("prioritized")) {
-//                    return Endpoint.GET_PRIORITIZED;
-//                }
-//            default:
-//                return Endpoint.UNKNOWN;
-//        }
-//    }
+    @Override
+    protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+        String[] elements = path.split("/");
+        if (method.equals("GET")) {
+            if (elements.length == 2 && elements[1].equals("prioritized")) {
+                handleGetList(exchange);
+            } else {
+                sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+            }
+        } else {
+            sendResponse(exchange, "Выберите правильный метод, для получения приоритетного списка задач.", METHOD_NOT_ALLOWED);
+        }
+    }
 }
+

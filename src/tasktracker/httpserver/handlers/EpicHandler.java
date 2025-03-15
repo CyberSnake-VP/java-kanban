@@ -7,7 +7,6 @@ import tasktracker.manager.TaskManager;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 
-
 import java.io.IOException;
 
 import java.nio.charset.StandardCharsets;
@@ -95,6 +94,19 @@ public class EpicHandler extends BaseHandler {
         sendResponse(exchange, epicJson, OK);
     }
 
+    private void handleGetSubtaskList(HttpExchange exchange) throws IOException {
+        String idStr = exchange.getRequestURI().getPath().split("/")[2];
+        int id = Integer.parseInt(idStr);
+        Epic epic = manager.getEpic(id);
+        List<Subtask> subtasks = manager.getSubtaskListInEpic(epic);
+        if (Objects.isNull(epic)) {
+            sendResponse(exchange, "Epic с указанным ID не найден", NOTE_FOUND);
+            return;
+        }
+        String subtaskJson = jsonMapper.toJson(subtasks);
+        sendResponse(exchange, subtaskJson, OK);
+    }
+
     @Override
     protected void runProcess(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
         String[] elements = path.split("/");
@@ -126,18 +138,5 @@ public class EpicHandler extends BaseHandler {
         if (isBadPath) {
             sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
         }
-    }
-
-    private void handleGetSubtaskList(HttpExchange exchange) throws IOException {
-        String idStr = exchange.getRequestURI().getPath().split("/")[2];
-        int id = Integer.parseInt(idStr);
-        Epic epic = manager.getEpic(id);
-        List<Subtask> subtasks = manager.getSubtaskListInEpic(epic);
-        if (Objects.isNull(epic)) {
-            sendResponse(exchange, "Epic с указанным ID не найден", NOTE_FOUND);
-            return;
-        }
-        String subtaskJson = jsonMapper.toJson(subtasks);
-        sendResponse(exchange, subtaskJson, OK);
     }
 }
