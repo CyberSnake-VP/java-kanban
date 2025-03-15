@@ -1,5 +1,6 @@
 package tasktracker.manager;
 
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
@@ -10,9 +11,9 @@ import java.util.List;
 public interface TaskManager {
 
     // Методы для Task
-    Task createTask(Task task);
+    Task createTask(Task task) throws IntersectionsException;
 
-    boolean updateTask(Task task);
+    Task updateTask(Task task) throws IntersectionsException;
 
     ArrayList<Task> getTaskList();
 
@@ -25,7 +26,7 @@ public interface TaskManager {
     // Методы для Epic
     Epic createEpic(Epic epic);
 
-    boolean updateEpic(Epic epic);
+    Epic updateEpic(Epic epic);
 
     ArrayList<Epic> getEpicList();
 
@@ -38,9 +39,9 @@ public interface TaskManager {
     Epic deleteEpic(int id);
 
     // Методы для Subtask
-    Subtask createSubtask(Subtask subtask);
+    Subtask createSubtask(Subtask subtask) throws IntersectionsException;
 
-    boolean updateSubtask(Subtask subtask);
+    Subtask updateSubtask(Subtask subtask) throws IntersectionsException;
 
     ArrayList<Subtask> getSubtaskList();
 

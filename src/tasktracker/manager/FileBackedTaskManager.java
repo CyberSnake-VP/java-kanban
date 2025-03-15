@@ -1,6 +1,7 @@
 package tasktracker.manager;
 
 import tasktracker.enumeration.Type;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.ManagerBackupException;
 import tasktracker.exceptions.ManagerSaveException;
 import tasktracker.enumeration.Status;
@@ -81,7 +82,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     // метод для получения задач из строки
-    private Task fromString(String value) {
+    private Task fromString(String value) throws IntersectionsException {
         // Собираем строку в массив, получаем значение полей, проверяя на null, для методов parse
         String[] splitStr = value.split(",");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy|HH:mm");
@@ -131,7 +132,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     //     Метод для создания объекта FileBackedTaskManager с готовыми задачами из Файла
-    public static FileBackedTaskManager loadFromFile(File file) {
+    public static FileBackedTaskManager loadFromFile(File file) throws IntersectionsException {
         try {
             int countId = 0;     // счетчик для генерации Id для будущий задач.
             FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(file);
@@ -158,7 +159,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task createTask(Task task) {
+    public Task createTask(Task task) throws IntersectionsException {
         super.createTask(task);
         save();
         return task;
@@ -172,29 +173,29 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Subtask createSubtask(Subtask subtask) {
+    public Subtask createSubtask(Subtask subtask) throws IntersectionsException {
         super.createSubtask(subtask);
         save();
         return subtask;
     }
 
     @Override
-    public boolean updateTask(Task task) {
-        boolean result = super.updateTask(task);
+    public Task updateTask(Task task) throws IntersectionsException {
+        Task result = super.updateTask(task);
         save();
         return result;
     }
 
     @Override
-    public boolean updateEpic(Epic epic) {
-        boolean result = super.updateEpic(epic);
+    public Epic updateEpic(Epic epic) {
+        Epic result = super.updateEpic(epic);
         save();
         return result;
     }
 
     @Override
-    public boolean updateSubtask(Subtask subtask) {
-        boolean result = super.updateSubtask(subtask);
+    public Subtask updateSubtask(Subtask subtask) throws IntersectionsException {
+        Subtask result = super.updateSubtask(subtask);
         save();
         return result;
     }
@@ -248,29 +249,34 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return deletedList;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IntersectionsException {
         FileBackedTaskManager fm = new FileBackedTaskManager(new File("./src/tasktracker/files/data.csv"));
+        try {
+            Task task1 = new Task("Задача1", null, LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
+            Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(60));
+            Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS,  LocalDateTime.of(2025, 1, 1, 11, 0), null);
+            fm.createTask(task1);
+            fm.createTask(task2);
+            fm.createTask(task3);
 
-        Task task1 = new Task("Задача1", "Действие", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(60));
-        Task task2 = new Task("Задача2", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 12, 0), Duration.ofMinutes(60));
-        Task task3 = new Task("Задача3", "Действие", Status.IN_PROGRESS, LocalDateTime.of(2025, 1, 1, 13, 0), Duration.ofMinutes(60));
-        fm.createTask(task1);
-        fm.createTask(task2);
+            Epic epic1 = new Epic("Эпик1", "Действие");
+            Epic epic2 = new Epic("Эпик2", "Действие");
+            Epic epic3 = new Epic("Эпик3", "Действие");
+            fm.createEpic(epic1);
+            fm.createEpic(epic2);
 
-        Epic epic1 = new Epic("Эпик1", "Действие");
-        Epic epic2 = new Epic("Эпик2", "Действие");
-        Epic epic3 = new Epic("Эпик3", "Действие");
-        fm.createEpic(epic1);
-        fm.createEpic(epic2);
+            Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.DONE, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
+            Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
+            // подзадача пересечется
+            Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(65));
 
-        Subtask subtask1 = new Subtask("Подзадача1", "Эпик1", epic1, Status.DONE, LocalDateTime.of(2025, 1, 1, 13, 50), Duration.ofMinutes(60));
-        Subtask subtask2 = new Subtask("Подзадача2", "Эпик1", epic1, LocalDateTime.of(2025, 1, 1, 14, 50), Duration.ofMinutes(60));
-        // подзадача пересечется
-        Subtask subtask3 = new Subtask("Подзадача3", "Эпик2", epic2, LocalDateTime.of(2025, 1, 1, 10, 0), Duration.ofMinutes(65));
+            fm.createSubtask(subtask1);
+            fm.createSubtask(subtask2);
+            fm.createSubtask(subtask3);
+        } catch (IntersectionsException e) {
+            System.out.println(e.getMessage());
+        }
 
-        fm.createSubtask(subtask1);
-        fm.createSubtask(subtask2);
-        fm.createSubtask(subtask3);
 
         System.out.println("СОЗДАННЫЕ ЗАДАЧИ:");
 

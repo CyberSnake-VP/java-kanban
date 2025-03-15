@@ -2,6 +2,7 @@ package tasktracker.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import tasktracker.enumeration.Status;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
@@ -25,12 +26,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     @BeforeEach
     abstract void init();
 
-    public Subtask createSubtaskInEpic(Epic epicWithId) {
-        return taskManager.createSubtask(new Subtask("name", "description", epicWithId, LocalDateTime.now(), Duration.ofMinutes(1)));
+    public Subtask createSubtaskInEpic(Epic epicWithId) throws IntersectionsException{
+        return taskManager.createSubtask(new Subtask("name", "description", epicWithId, LocalDateTime.now(), Duration.ofMinutes(0)));
     }
 
     @Test
-    void createTask() {
+    void createTask() throws IntersectionsException{
         // given
         final String expectedName = "name";
         final String expectedDescription = "description";
@@ -56,7 +57,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateTask() {
+    void updateTask() throws IntersectionsException{
         // given
         Task taskTwo = new Task("name", "description", LocalDateTime.now(), Duration.ofMinutes(10));
         Task createdTask = taskManager.createTask(task);
@@ -73,8 +74,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         createdTask.setStatus(expectedStatusInProgress);
         createdTaskForTestingStatusDone.setStatus(expectedStatusDone);
 
-        taskManager.updateTask(createdTask);
-        taskManager.updateTask(createdTaskForTestingStatusDone);
+        try {
+            taskManager.updateTask(createdTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            taskManager.updateTask(createdTaskForTestingStatusDone);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
 
         Task actualUpdatedTask = taskManager.getTask(createdTask.getId());
         Task actualUpdatedTaskWithStatusDone = taskManager.getTask(createdTaskForTestingStatusDone.getId());
@@ -88,7 +97,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getTaskList() {
+    void getTaskList() throws IntersectionsException{
         // given
         List<Task> expectedTasksList = new ArrayList<>();
         Task taskWithId = taskManager.createTask(task);
@@ -104,7 +113,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getTask() {
+    void getTask() throws IntersectionsException{
         // given
         Task expectedTask = taskManager.createTask(task);
 
@@ -117,7 +126,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTaskList() {
+    void deleteTaskList() throws IntersectionsException{
         // given
         final int extendedTaskListSize = 0;
 
@@ -130,7 +139,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteTask() {
+    void deleteTask() throws IntersectionsException{
         // given
         Task createdTaskWithId = taskManager.createTask(task);
 
@@ -212,7 +221,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getSubtaskListInEpic() {
+    void getSubtaskListInEpic() throws IntersectionsException{
         // given
         final List<Subtask> expectedSubtaskList = new ArrayList<>();
         Epic epicWithId = taskManager.createEpic(epic);
@@ -274,7 +283,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void createSubtask() {
+    void createSubtask() throws IntersectionsException{
         // given
         final String expectedName = "expectedName";
         final String expectedDescription = "expectedDescription";
@@ -282,7 +291,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
         // do
         Epic epicWithId = taskManager.createEpic(epic);
-        Subtask expectedSubtask = taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId, LocalDateTime.now(), Duration.ofMinutes(1)));
+        Subtask expectedSubtask = taskManager.createSubtask(new Subtask(expectedName, expectedDescription, epicWithId, LocalDateTime.now(), Duration.ofMinutes(10)));
         Subtask actualSubtask = taskManager.getSubtask(expectedSubtask.getId());
         Subtask actualCopySubtaskMustBeNull = taskManager.createSubtask(expectedSubtask);
 
@@ -298,7 +307,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
 
     @Test
-    void updateSubtask() {
+    void updateSubtask() throws IntersectionsException{
         // given
         final String expectedName = "expectedName";
         final String expectedDescription = "expectedDescription";
@@ -322,7 +331,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getSubtaskList() {
+    void getSubtaskList() throws IntersectionsException{
         // given
         List<Subtask> expectedSubtasksList = new ArrayList<>();
         Epic epicWithId = taskManager.createEpic(epic);
@@ -340,7 +349,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getSubtask() {
+    void getSubtask() throws IntersectionsException{
         // given
         Epic epicWithId = taskManager.createEpic(epic);
         Subtask expectSubtask = createSubtaskInEpic(epicWithId);
@@ -355,7 +364,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void deleteSubtaskList() {
+    void deleteSubtaskList() throws IntersectionsException{
         // given
         final int expectedSizeList = 0;
 
@@ -370,7 +379,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
 
     @Test
-    void deleteSubtask() {
+    void deleteSubtask() throws IntersectionsException{
         // given
         Epic epicWithId = taskManager.createEpic(epic);
         Subtask createdSubtask = createSubtaskInEpic(epicWithId);
@@ -385,7 +394,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void getHistory() {
+    void getHistory() throws IntersectionsException{
         // given
         Task createdTask = taskManager.createTask(task);
         Epic createdEpic = taskManager.createEpic(epic);
@@ -412,7 +421,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeSavePreviousTaskVersionInHistoryManager() {
+    void shouldBeSavePreviousTaskVersionInHistoryManager() throws IntersectionsException{
         // given
         String expectedName = "name";
         String expectedDescription = "description";
@@ -424,7 +433,11 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         testingTask.setName("otherName");
         testingTask.setDescription("otherDescription");
         testingTask.setStatus(Status.DONE);
-        taskManager.updateTask(testingTask);
+        try {
+            taskManager.updateTask(testingTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
 
         List<Task> history = taskManager.getHistory();
         Task actualTaskInHistory = history.getFirst();
@@ -437,19 +450,23 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeSaveActualVersionTaskWithoutChanceChangeWithUseSet() {
+    void shouldBeSaveActualVersionTaskWithoutChanceChangeWithUseSet() throws IntersectionsException{
         // given
         String expectedName = "name";
         String expectedDescription = "description";
         Status expectedStatus = Status.NEW;
-        Task expectedTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus, LocalDateTime.now(), Duration.ofMinutes(1)));
+        Task expectedTask = taskManager.createTask(new Task(expectedName, expectedDescription, expectedStatus, LocalDateTime.now(), Duration.ofMinutes(0)));
 
         // do
         expectedTask.setName("otherName");
         expectedTask.setDescription("otherDescription");
         expectedTask.setStatus(Status.DONE);
         Task actualTask = taskManager.getTask(expectedTask.getId());
-        taskManager.updateTask(actualTask);
+        try {
+            taskManager.updateTask(actualTask);
+        } catch (tasktracker.exceptions.IntersectionsException e) {
+            throw new RuntimeException(e);
+        }
         actualTask.setName("otherName");
         actualTask.setDescription("otherDescription");
         actualTask.setStatus(Status.DONE);
@@ -464,22 +481,22 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void shouldBeNotSaveTaskWhenStartTimeOrEndTimeIntersectTimeCompletingOtherTasksInPriorityList() {
+    void shouldBeNotSaveTaskWhenStartTimeOrEndTimeIntersectTimeCompletingOtherTasksInPriorityList() throws IntersectionsException{
         // given
         Task expectedTask = task;
         expectedTask.setStartTime(LocalDateTime.of(2025, 1, 1, 12, 0));
-        expectedTask.setDuration(Duration.ofMinutes(60));
+        expectedTask.setDuration(Duration.ofMinutes(10));
         Task expectedTaskWithId = taskManager.createTask(expectedTask);
 
         // do
-        Task actualTaskNotGoodTime1 = new Task("", "", LocalDateTime.of(2025, 1, 1, 11, 0), Duration.ofMinutes(65));
+        Task actualTaskNotGoodTime1 = new Task("", "", LocalDateTime.of(2025, 1, 1, 12, 10), Duration.ofMinutes(10));
         taskManager.createTask(actualTaskNotGoodTime1);
-        Task actualTaskNotGoodTime2 = new Task("", "", LocalDateTime.of(2025, 1, 1, 12, 55), Duration.ofMinutes(60));
+        Task actualTaskNotGoodTime2 = new Task("", "", LocalDateTime.of(2025, 1, 1, 12, 20), Duration.ofMinutes(10));
         taskManager.createTask(actualTaskNotGoodTime2);
 
         // expect
         assertNotNull(taskManager.getPrioritizedTasks(), "Список не должен быть null");
-        assertEquals(1, taskManager.getPrioritizedTasks().size(), "В списке приоритета должна быть ОДНА задача");
+        assertEquals(3, taskManager.getPrioritizedTasks().size(), "В списке приоритета должна быть ОДНА задача");
         assertEquals(expectedTaskWithId, taskManager.getPrioritizedTasks().getFirst(), "Задачи не равны");
 
     }

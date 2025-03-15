@@ -2,8 +2,8 @@ package tasktracker.manager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.exceptions.ManagerBackupException;
-import tasktracker.exceptions.ManagerSaveException;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
 import tasktracker.tasks.Task;
@@ -30,7 +30,7 @@ class FileBackedTaskManagerTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void shouldBeSaveAndLoadFromFile() {
+    void shouldBeSaveAndLoadFromFile() throws IntersectionsException {
         // given
         Task expectedTask = manager.createTask(task);
         Epic expectedEpic = manager.createEpic(epic);

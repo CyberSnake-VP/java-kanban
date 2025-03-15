@@ -1,12 +1,10 @@
 package tasktracker.manager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tasktracker.enumeration.Status;
-import tasktracker.exceptions.ManagerValidationIsFailed;
+import tasktracker.exceptions.IntersectionsException;
 import tasktracker.tasks.Epic;
 import tasktracker.tasks.Subtask;
-import tasktracker.tasks.Task;
 
 
 import java.time.Duration;
@@ -18,10 +16,10 @@ class IdentifierTest extends InMemoryTaskManagerTest {
 
 
     @Test
-    void setEpicStatusShouldBeNew() {
+    void setEpicStatusShouldBeNew() throws IntersectionsException {
         Epic epicTest = taskManager.createEpic(epic);
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(1)));
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.NEW, LocalDateTime.now(), Duration.ofMinutes(1)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(0)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.NEW, LocalDateTime.now(), Duration.ofMinutes(0)));
 
         Identifier.setEpicStatus(epicTest, taskManager.getSubtaskListInEpic(epicTest));
 
@@ -30,9 +28,9 @@ class IdentifierTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void setEpicStatusShouldBeDone() {
+    void setEpicStatusShouldBeDone() throws IntersectionsException{
         Epic epicTest = taskManager.createEpic(epic);
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(1)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(0)));
 
         Identifier.setEpicStatus(epic, taskManager.getSubtaskListInEpic(epic));
 
@@ -41,11 +39,11 @@ class IdentifierTest extends InMemoryTaskManagerTest {
     }
 
     @Test
-    void setEpicStatusShouldBeInProgress() {
+    void setEpicStatusShouldBeInProgress() throws IntersectionsException{
         Epic epicTest = taskManager.createEpic(epic);
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.NEW, LocalDateTime.now(), Duration.ofMinutes(1)));
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(1)));
-        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(1)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.NEW, LocalDateTime.now(), Duration.ofMinutes(0)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.DONE, LocalDateTime.now(), Duration.ofMinutes(0)));
+        taskManager.createSubtask(new Subtask("name", "description", epicTest, Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(0)));
 
         Identifier.setEpicStatus(epicTest, taskManager.getSubtaskListInEpic(epicTest));
 
