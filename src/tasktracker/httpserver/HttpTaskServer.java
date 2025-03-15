@@ -1,19 +1,13 @@
 package tasktracker.httpserver;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import com.sun.net.httpserver.HttpServer;
-import tasktracker.httpserver.adapters.DurationAdapter;
-import tasktracker.httpserver.adapters.LocalDateTimeAdapter;
+
 import tasktracker.httpserver.handlers.*;
 import tasktracker.manager.Managers;
 import tasktracker.manager.TaskManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 public class HttpTaskServer {
     private static HttpServer server;

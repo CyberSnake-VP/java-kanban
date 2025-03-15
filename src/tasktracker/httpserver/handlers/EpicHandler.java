@@ -22,38 +22,38 @@ public class EpicHandler extends BaseHandler {
         super(manager);
     }
 
-    @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        try {
-            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-            switch (endpoint) {
-                case GET_EPICS: {
-                    handleGetEpicList(exchange);
-                    break;
-                }
-                case GET_EPIC_ID: {
-                    handleGetEPicById(exchange);
-                    break;
-                }
-                case GET_SUBTASK_EPIC: {
-                    handleGetSubtaskList(exchange);
-                    break;
-                }
-                case POST_EPIC: {
-                    handleCreateOrUpdateEpic(exchange);
-                    break;
-                }
-                case DELETE_EPIC: {
-                    handleDeleteEpic(exchange);
-                }
-                case UNKNOWN: {
-                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-                }
-            }
-        } catch (IOException | JsonErrorConverter e) {
-            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-        }
-    }
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        try {
+//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
+//            switch (endpoint) {
+//                case GET_EPICS: {
+//                    handleGetEpicList(exchange);
+//                    break;
+//                }
+//                case GET_EPIC_ID: {
+//                    handleGetEPicById(exchange);
+//                    break;
+//                }
+//                case GET_SUBTASK_EPIC: {
+//                    handleGetSubtaskList(exchange);
+//                    break;
+//                }
+//                case POST_EPIC: {
+//                    handleCreateOrUpdateEpic(exchange);
+//                    break;
+//                }
+//                case DELETE_EPIC: {
+//                    handleDeleteEpic(exchange);
+//                }
+//                case UNKNOWN: {
+//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+//                }
+//            }
+//        } catch (IOException | JsonErrorConverter e) {
+//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
+//        }
+//    }
 
     private void handleGetSubtaskList(HttpExchange exchange) throws IOException {
         String idStr = exchange.getRequestURI().getPath().split("/")[2];
@@ -138,30 +138,30 @@ public class EpicHandler extends BaseHandler {
         sendResponse(exchange, jsonList, OK);
     }
 
-    private Endpoint getEndpoint(String path, String requestMethod) {
-        String[] elements = path.split("/");
-
-        switch (requestMethod) {
-            case "GET":
-                if (elements.length == 2 && elements[1].equals("epics")) {
-                    return Endpoint.GET_EPICS;
-                }
-                if (elements.length == 3 && elements[1].equals("epics") && isNumber(elements[2])) {
-                    return Endpoint.GET_EPIC_ID;
-                }
-                if (elements.length == 4 && elements[1].equals("epics") && isNumber(elements[2]) && elements[3].equals("subtasks")) {
-                    return Endpoint.GET_SUBTASK_EPIC;
-                }
-            case "POST":
-                if (elements.length == 2 && elements[1].equals("epics")) {
-                    return Endpoint.POST_EPIC;
-                }
-            case "DELETE":
-                if (elements.length == 3 && elements[1].equals("epics") && isNumber(elements[2])) {
-                    return Endpoint.DELETE_EPIC;
-                }
-            default:
-                return Endpoint.UNKNOWN;
-        }
-    }
+//    private Endpoint getEndpoint(String path, String requestMethod) {
+//        String[] elements = path.split("/");
+//
+//        switch (requestMethod) {
+//            case "GET":
+//                if (elements.length == 2 && elements[1].equals("epics")) {
+//                    return Endpoint.GET_EPICS;
+//                }
+//                if (elements.length == 3 && elements[1].equals("epics") && isNumber(elements[2])) {
+//                    return Endpoint.GET_EPIC_ID;
+//                }
+//                if (elements.length == 4 && elements[1].equals("epics") && isNumber(elements[2]) && elements[3].equals("subtasks")) {
+//                    return Endpoint.GET_SUBTASK_EPIC;
+//                }
+//            case "POST":
+//                if (elements.length == 2 && elements[1].equals("epics")) {
+//                    return Endpoint.POST_EPIC;
+//                }
+//            case "DELETE":
+//                if (elements.length == 3 && elements[1].equals("epics") && isNumber(elements[2])) {
+//                    return Endpoint.DELETE_EPIC;
+//                }
+//            default:
+//                return Endpoint.UNKNOWN;
+//        }
+//    }
 }

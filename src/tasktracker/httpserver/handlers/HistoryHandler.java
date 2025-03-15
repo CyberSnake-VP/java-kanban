@@ -15,23 +15,23 @@ public class HistoryHandler extends BaseHandler {
         super(manager);
     }
 
-    @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        try {
-            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-            switch (endpoint) {
-                case GET_HISTORY: {
-                    handleGetHistory(exchange);
-                    break;
-                }
-                case UNKNOWN: {
-                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-                }
-            }
-        } catch (IOException | JsonErrorConverter e) {
-            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-        }
-    }
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        try {
+//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
+//            switch (endpoint) {
+//                case GET_HISTORY: {
+//                    handleGetHistory(exchange);
+//                    break;
+//                }
+//                case UNKNOWN: {
+//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+//                }
+//            }
+//        } catch (IOException | JsonErrorConverter e) {
+//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
+//        }
+//    }
 
     private void handleGetHistory(HttpExchange exchange) throws IOException, JsonErrorConverter {
         List<Task> history = manager.getHistory();
@@ -39,17 +39,17 @@ public class HistoryHandler extends BaseHandler {
         sendResponse(exchange, jsonHistory, OK);
     }
 
-    private Endpoint getEndpoint(String path, String requestMethod) {
-        String[] elements = path.split("/");
-
-        switch (requestMethod) {
-            case "GET":
-                if (elements.length == 2 && elements[1].equals("history")) {
-                    return Endpoint.GET_HISTORY;
-                }
-            default:
-                return Endpoint.UNKNOWN;
-        }
-    }
+//    private Endpoint getEndpoint(String path, String requestMethod) {
+//        String[] elements = path.split("/");
+//
+//        switch (requestMethod) {
+//            case "GET":
+//                if (elements.length == 2 && elements[1].equals("history")) {
+//                    return Endpoint.GET_HISTORY;
+//                }
+//            default:
+//                return Endpoint.UNKNOWN;
+//        }
+//    }
 
 }

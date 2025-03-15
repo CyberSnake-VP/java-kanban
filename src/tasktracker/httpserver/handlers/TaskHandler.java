@@ -20,37 +20,7 @@ public class TaskHandler extends BaseHandler {
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-
-        try {
-            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-            switch (endpoint) {
-                case GET_TASKS: {
-                    handleGetTaskList(exchange);
-                    break;
-                }
-                case GET_TASK_ID: {
-                    handleGEtTaskById(exchange);
-                    break;
-                }
-                case POST_TASK: {
-                    handleCreateOrUpdateTask(exchange);
-                    break;
-                }
-                case DELETE_TASK: {
-                    handleDeleteTaskById(exchange);
-                    break;
-                }
-                case UNKNOWN: {
-                    sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-                }
-            }
-        } catch (IOException | JsonErrorConverter e) {
-            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-        }
-    }
-
-    private void handleDeleteTaskById(HttpExchange exchange) throws IOException {
+    protected void handleDeleteById(HttpExchange exchange) throws IOException {
         String idStr = exchange.getRequestURI().getPath().split("/")[2];
         int id = Integer.parseInt(idStr);
         Task task = manager.deleteTask(id);
@@ -60,14 +30,17 @@ public class TaskHandler extends BaseHandler {
         }
         String taskJson = jsonMapper.toJson(task);
         sendResponse(exchange, taskJson, OK);
-
     }
 
-    private void handleCreateOrUpdateTask(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    @Override
+    protected void handleCreateOrUpdate(HttpExchange exchange) throws IOException, JsonErrorConverter {
         byte[] bytes = exchange.getRequestBody().readAllBytes();
         String jsonBody = new String(bytes, StandardCharsets.UTF_8);
         try {
             Task task = jsonMapper.fromJson(jsonBody, Task.class);
+            if(Objects.isNull(task)) {
+                throw new JsonErrorConverter("Задача не может быть создана пустой, необходимо заполнить хотя бы одно поле name.");
+            }
             if (task.getId() == 0) {
                 /* Проверяем корректность полей в запросе тела Json, задачу можно создать, если верно указать поле name
                  * Думаю, чтобы создать задачу, нужно хотя бы указать ее название... */
@@ -136,7 +109,8 @@ public class TaskHandler extends BaseHandler {
         }
     }
 
-    private void handleGEtTaskById(HttpExchange exchange) throws IOException {
+    @Override
+    protected void handleGetById(HttpExchange exchange) throws IOException {
         String idStr = exchange.getRequestURI().getPath().split("/")[2];
         int id = Integer.parseInt(idStr);
         Task task = manager.getTask(id);
@@ -148,34 +122,35 @@ public class TaskHandler extends BaseHandler {
         sendResponse(exchange, taskJson, OK);
     }
 
-    private void handleGetTaskList(HttpExchange exchange) throws IOException {
+    @Override
+    protected void handleGetList(HttpExchange exchange) throws IOException {
         List<Task> taskList = manager.getTaskList();
         String jsonListTask = jsonMapper.toJson(taskList);
         sendResponse(exchange, jsonListTask, OK);
 
     }
 
-    private Endpoint getEndpoint(String stringPath, String requestMethod) {
-        String[] elements = stringPath.split("/");
-
-        switch (requestMethod) {
+    @Override
+    protected void getEndpoint(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+        String[] elements = path.split("/");
+        switch (method) {
             case "GET":
                 if (elements.length == 2 && elements[1].equals("tasks")) {
-                    return Endpoint.GET_TASKS;
+                    handleGetList(exchange);
                 }
                 if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
-                    return Endpoint.GET_TASK_ID;
+                    handleGetById(exchange);
                 }
             case "POST":
                 if (elements.length == 2 && elements[1].equals("tasks")) {
-                    return Endpoint.POST_TASK;
+                    handleCreateOrUpdate(exchange);
                 }
             case "DELETE":
                 if (elements.length == 3 && elements[1].equals("tasks") && isNumber(elements[2])) {
-                    return Endpoint.DELETE_TASK;
+                    handleDeleteById(exchange);
                 }
             default:
-                return Endpoint.UNKNOWN;
+                sendResponse(exchange, "Неверно указан адрес, проверьте составление запроса.", NOTE_FOUND);
         }
     }
 }

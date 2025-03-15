@@ -25,35 +25,35 @@ public class SubtaskHandler extends BaseHandler {
         super(manager);
     }
 
-    @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        try {
-            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
-            switch (endpoint) {
-                case GET_SUBTASK: {
-                    handleGetSubtaskList(exchange);
-                    break;
-                }
-                case GET_SUBTASK_ID: {
-                    handleGetSubtaskById(exchange);
-                    break;
-                }
-                case POST_SUBTASK: {
-                    handleCreateOrUpdateSubtask(exchange);
-                    break;
-                }
-                case DELETE_SUBTASK: {
-                    handleDeleteSubtask(exchange);
-                }
-                case UNKNOWN: {
-                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
-                }
-            }
-        } catch (IOException | JsonErrorConverter e) {
-            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
-        }
-
-    }
+//    @Override
+//    public void handle(HttpExchange exchange) throws IOException {
+//        try {
+//            Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
+//            switch (endpoint) {
+//                case GET_SUBTASK: {
+//                    handleGetSubtaskList(exchange);
+//                    break;
+//                }
+//                case GET_SUBTASK_ID: {
+//                    handleGetSubtaskById(exchange);
+//                    break;
+//                }
+//                case POST_SUBTASK: {
+//                    handleCreateOrUpdateSubtask(exchange);
+//                    break;
+//                }
+//                case DELETE_SUBTASK: {
+//                    handleDeleteSubtask(exchange);
+//                }
+//                case UNKNOWN: {
+//                    sendResponse(exchange, "Не верно указан адрес, проверьте составление запроса.", NOTE_FOUND);
+//                }
+//            }
+//        } catch (IOException | JsonErrorConverter e) {
+//            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
+//        }
+//
+//    }
 
     private void handleCreateOrUpdateSubtask(HttpExchange exchange) throws IOException, JsonErrorConverter {
         byte[] bytes = exchange.getRequestBody().readAllBytes();
@@ -161,27 +161,27 @@ public class SubtaskHandler extends BaseHandler {
         sendResponse(exchange, jsonList, OK);
     }
 
-    private Endpoint getEndpoint(String path, String requestMethod) {
-        String[] elements = path.split("/");
-
-        switch (requestMethod) {
-            case "GET":
-                if (elements.length == 2 && elements[1].equals("subtasks")) {
-                    return Endpoint.GET_SUBTASK;
-                }
-                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
-                    return Endpoint.GET_SUBTASK_ID;
-                }
-            case "POST":
-                if (elements.length == 2 && elements[1].equals("subtasks")) {
-                    return Endpoint.POST_SUBTASK;
-                }
-            case "DELETE":
-                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
-                    return Endpoint.DELETE_SUBTASK;
-                }
-            default:
-                return Endpoint.UNKNOWN;
-        }
-    }
+//    private Endpoint getEndpoint(String path, String requestMethod) {
+//        String[] elements = path.split("/");
+//
+//        switch (requestMethod) {
+//            case "GET":
+//                if (elements.length == 2 && elements[1].equals("subtasks")) {
+//                    return Endpoint.GET_SUBTASK;
+//                }
+//                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
+//                    return Endpoint.GET_SUBTASK_ID;
+//                }
+//            case "POST":
+//                if (elements.length == 2 && elements[1].equals("subtasks")) {
+//                    return Endpoint.POST_SUBTASK;
+//                }
+//            case "DELETE":
+//                if (elements.length == 3 && elements[1].equals("subtasks") && isNumber(elements[2])) {
+//                    return Endpoint.DELETE_SUBTASK;
+//                }
+//            default:
+//                return Endpoint.UNKNOWN;
+//        }
+//    }
 }

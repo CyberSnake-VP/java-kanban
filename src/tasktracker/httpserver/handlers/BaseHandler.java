@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import tasktracker.enumeration.Endpoint;
+import tasktracker.exceptions.JsonErrorConverter;
 import tasktracker.httpserver.adapters.DurationAdapter;
 import tasktracker.httpserver.adapters.LocalDateTimeAdapter;
 import tasktracker.manager.TaskManager;
@@ -28,38 +30,63 @@ public class BaseHandler implements HttpHandler {
     public BaseHandler(TaskManager manager) {
         this.manager = manager;
         this.jsonMapper = new GsonBuilder()
-                    .serializeNulls()
-                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                    .registerTypeAdapter(Duration.class, new DurationAdapter())
-                    .create();
+                .serializeNulls()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .create();
     }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod();
-        switch (method) {
-            case "GET":
-                processGet(exchange);
-                break;
-            case "POST":
-                processPost(exchange);
-                break;
-            case "DELETE":
-                processDelete(exchange);
-                break;
-            default: writeToUser(exchange, "Данный метод не предусмотрен.");
+        try {
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+            switch (method) {
+                case "GET":
+                    processGet(exchange, path);
+                    break;
+                case "POST":
+                    processPost(exchange, path);
+                    break;
+                case "DELETE":
+                    processDelete(exchange, path);
+                    break;
+                default:
+                    sendResponse(exchange, "Данный метод не предусмотрен.", METHOD_NOT_ALLOWED);
+            }
+        } catch (IOException | JsonErrorConverter e) {
+            sendResponse(exchange, "Внутренняя ошибка сервера. " + e.getMessage(), SERVER_ERROR);
         }
     }
 
-    private void processDelete(HttpExchange exchange) {
+    // В этих методах запускается переопределяемый метод getEndpoint, который запускает необходимый метод для обработки запроса
+    protected void processDelete(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
+        getEndpoint(path, "DELETE", exchange);
     }
 
-    private void processPost(HttpExchange exchange) {
+    protected void processPost(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
+        getEndpoint(path, "POST", exchange);
     }
 
-    private void processGet(HttpExchange exchange) {
+    protected void processGet(HttpExchange exchange, String path) throws IOException, JsonErrorConverter {
+        getEndpoint(path, "GET", exchange);
     }
 
+    // Общие методы для переопределения в Hanlder классах
+    protected void handleGetList(HttpExchange exchange) throws IOException {
+    }
+
+    protected void handleGetById(HttpExchange exchange) throws IOException {
+    }
+
+    protected void handleCreateOrUpdate(HttpExchange exchange) throws IOException, JsonErrorConverter {
+    }
+
+    protected void handleDeleteById(HttpExchange exchange) throws IOException {
+    }
+
+    protected void getEndpoint(String path, String method, HttpExchange exchange) throws IOException, JsonErrorConverter {
+    }
 
     protected void sendResponse(HttpExchange h, String response, Integer code) throws IOException {
         byte[] resp = response.getBytes(StandardCharsets.UTF_8);
